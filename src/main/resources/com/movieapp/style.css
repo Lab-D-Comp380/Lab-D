@@ -4,6 +4,7 @@
 
 .page {
     -fx-background-color: #070707;
+    -fx-padding: 20 30 20 30;
 }
 
 .scroll-pane {
