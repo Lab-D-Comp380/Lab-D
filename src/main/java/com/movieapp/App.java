@@ -26,13 +26,16 @@ public class App extends Application {
     private final Map<String, String> users = new HashMap<>();
 
     @Override
-    public void start(Stage stage) {
-        this.stage = stage;
-        stage.setTitle("Movie Tickets");
-        showLoginScreen();
-        stage.show();
-    }
-
+public void start(Stage stage) {
+    this.stage = stage;
+    stage.setTitle("Movie Tickets");
+    stage.setWidth(1250);
+    stage.setHeight(700);
+    stage.setMinWidth(1250);
+    stage.setMinHeight(700);
+    showLoginScreen();
+    stage.show();
+}
     // ---------- LOGIN SCREEN ----------
     private void showLoginScreen() {
         Label title = makeTitle("Sign In");
@@ -103,17 +106,24 @@ public class App extends Application {
         setScreen(makePanel(title, username, passwordRow, error, registerButton, goLogin));
     }
 
-    // ---------- MAIN SCREEN ----------
-    private void showMainScreen(String username) {
-        Label welcome = makeTitle("Welcome, " + username + "!");
-        Label note = new Label("This is where the movies will go.");
-        note.setStyle("-fx-text-fill: #9a93a8;");
+    // ---------- MAIN SCREEN (now shows the movie gallery) ----------
+private void showMainScreen(String username) {
+    MovieGalleryView gallery = new MovieGalleryView();
+    javafx.scene.Parent galleryView = gallery.createView();
 
-        Button logout = makeButton("Log Out");
-        logout.setOnAction(e -> showLoginScreen());
+    javafx.scene.Scene scene = new javafx.scene.Scene(galleryView);
 
-        setScreen(makePanel(welcome, note, logout));
+    // Load the stylesheet only if it's actually found, so a missing/misnamed
+    // file doesn't crash the screen switch.
+    var cssUrl = getClass().getResource("/com/movieapp/style.css");
+    if (cssUrl != null) {
+        scene.getStylesheets().add(cssUrl.toExternalForm());
+    } else {
+        System.out.println("WARNING: style.css not found — gallery will be unstyled.");
     }
+
+    stage.setScene(scene);
+}
 
     // ---------- SHOW/HIDE PASSWORD ----------
     // Returns the password field stacked with a TextField that mirrors it,
@@ -147,7 +157,7 @@ public class App extends Application {
         VBox root = new VBox(panel);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: #292828;");
-        stage.setScene(new Scene(root, 600, 520));
+       stage.setScene(new Scene(root));
     }
 
     private VBox makePanel(Node... items) {

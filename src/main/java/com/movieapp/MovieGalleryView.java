@@ -17,9 +17,11 @@ public class MovieGalleryView {
             String releaseDate,
             String posterFile
     ) {
-        ImageView poster = new ImageView(
-                new Image(getClass().getResourceAsStream("/posters/" + posterFile))
-        );
+       ImageView poster = new ImageView();
+var posterStream = getClass().getResourceAsStream("/posters/" + posterFile);
+if (posterStream != null) {
+    poster.setImage(new Image(posterStream));
+}
 
         poster.setFitWidth(220);
         poster.setFitHeight(330);
