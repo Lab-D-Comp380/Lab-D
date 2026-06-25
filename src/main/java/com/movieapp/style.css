@@ -1,0 +1,75 @@
+.root {
+    -fx-font-family: "Arial";
+}
+
+.page {
+    -fx-background-color: #070707;
+}
+
+.scroll-pane {
+    -fx-background: #070707;
+    -fx-background-color: #070707;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #070707;
+}
+
+.brand {
+    -fx-text-fill: #35bdf5;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.page-title {
+    -fx-text-fill: white;
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+}
+
+.section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 23px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 0 8 0;
+    -fx-border-color: transparent transparent #6c7378 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.active-tab {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 8 0;
+    -fx-border-color: transparent transparent #f4c64e transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+.movie-card {
+    -fx-background-color: #070707;
+}
+
+.movie-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.movie-details {
+    -fx-text-fill: #d3d7da;
+    -fx-font-size: 13px;
+}
+
+.ticket-button {
+    -fx-background-color: #e7294f;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 24px;
+    -fx-padding: 12 18 12 18;
+}
+
+.ticket-button:hover {
+    -fx-background-color: #ff3c62;
+}
