@@ -9,38 +9,40 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
+
 public class MovieGalleryView {
 
-    private VBox createMovieCard(
-            String title,
-            String details,
-            String releaseDate,
-            String posterFile
-    ) {
-       ImageView poster = new ImageView();
-var posterStream = getClass().getResourceAsStream("/posters/" + posterFile);
-if (posterStream != null) {
-    poster.setImage(new Image(posterStream));
-}
+    private final MovieService movieService;
+
+    public MovieGalleryView(MovieService movieService) {
+        this.movieService = movieService;
+    }
+
+    private VBox createMovieCard(Movie movie) {
+        ImageView poster = new ImageView();
+        if (movie.getPosterFilename() != null) {
+            var posterStream = getClass().getResourceAsStream("/posters/" + movie.getPosterFilename());
+            if (posterStream != null) {
+                poster.setImage(new Image(posterStream));
+            }
+        }
 
         poster.setFitWidth(220);
         poster.setFitHeight(330);
 
-        Label titleLabel = new Label(title);
+        Label titleLabel = new Label(movie.getTitle());
         titleLabel.getStyleClass().add("movie-title");
 
-        Label detailsLabel = new Label(details);
+        Label detailsLabel = new Label(movie.getDetailsLabel());
         detailsLabel.getStyleClass().add("movie-details");
 
-        Label releaseLabel = new Label("Released " + releaseDate);
+        Label releaseLabel = new Label(movie.getReleaseDateLabel());
         releaseLabel.getStyleClass().add("movie-details");
 
         Button selectButton = new Button("Select Movie");
         selectButton.getStyleClass().add("ticket-button");
-
-        selectButton.setOnAction(event ->
-                selectButton.setText("Selected")
-        );
+        selectButton.setOnAction(event -> selectButton.setText("Selected"));
 
         VBox card = new VBox(
                 8,
@@ -64,41 +66,19 @@ if (posterStream != null) {
         Label sectionTitle = new Label("Featured Movies");
         sectionTitle.getStyleClass().add("section-title");
 
-        HBox cards = new HBox(
-                16,
-                createMovieCard(
-                        "Skybound",
-                        "1 HR 48 MIN | PG-13",
-                        "June 24, 2026",
-                        "skybound.png"
-                ),
-                createMovieCard(
-                        "Pixel Quest",
-                        "1 HR 42 MIN | PG",
-                        "June 19, 2026",
-                        "pixelquest.png"
-                ),
-                createMovieCard(
-                        "Echo Point",
-                        "2 HR 05 MIN | PG-13",
-                        "June 12, 2026",
-                        "echopoint.png"
-                ),
-                createMovieCard(
-                        "Midnight Signal",
-                        "1 HR 51 MIN | R",
-                        "May 15, 2026",
-                        "midnightsignal.png"
-                ),
-                createMovieCard(
-                        "The Last Orbit",
-                        "1 HR 36 MIN | PG-13",
-                        "June 19, 2026",
-                        "lastorbit.png"
-                )
-        );
-
+        List<Movie> movies = movieService.getMovies();
+        HBox cards = new HBox(16);
         cards.setAlignment(Pos.TOP_LEFT);
+
+        for (Movie movie : movies) {
+            cards.getChildren().add(createMovieCard(movie));
+        }
+
+        if (movies.isEmpty()) {
+            Label emptyLabel = new Label("No movies available.");
+            emptyLabel.getStyleClass().add("movie-details");
+            cards.getChildren().add(emptyLabel);
+        }
 
         VBox page = new VBox(
                 18,
