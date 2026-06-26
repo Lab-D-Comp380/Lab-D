@@ -1,46 +1,92 @@
 package com.movieapp;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 // ---------- MOVIE CLASS ----------
 public class Movie {
 
-    // Movie information
+    private static final DateTimeFormatter RELEASE_FORMAT =
+            DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US);
+
     private int movieId;
     private String title;
     private String genre;
     private int duration;
+    private String rating;
+    private LocalDate releaseDate;
+    private String posterFilename;
 
-    // Creates a new movie object with the provided information.
     public Movie(int movieId, String title, String genre, int duration) {
+        this(movieId, title, genre, duration, null, null, null);
+    }
 
+    public Movie(
+            int movieId,
+            String title,
+            String genre,
+            int duration,
+            String rating,
+            LocalDate releaseDate,
+            String posterFilename
+    ) {
         this.movieId = movieId;
         this.title = title;
         this.genre = genre;
         this.duration = duration;
+        this.rating = rating;
+        this.releaseDate = releaseDate;
+        this.posterFilename = posterFilename;
     }
 
-    // ---------- GETTERS ----------
-
-    // Returns the movie ID.
     public int getMovieId() {
         return movieId;
     }
 
-    // Returns the movie title.
     public String getTitle() {
         return title;
     }
 
-    // Returns the movie genre.
     public String getGenre() {
         return genre;
     }
 
-    // Returns the movie duration in minutes.
     public int getDuration() {
         return duration;
     }
 
-    // Returns a formatted string describing the movie.
+    public String getRating() {
+        return rating;
+    }
+
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+
+    public String getPosterFilename() {
+        return posterFilename;
+    }
+
+    public String getDetailsLabel() {
+        int hours = duration / 60;
+        int minutes = duration % 60;
+        String durationText = hours > 0
+                ? hours + " HR " + String.format("%02d", minutes) + " MIN"
+                : minutes + " MIN";
+        if (rating == null || rating.isBlank()) {
+            return durationText;
+        }
+        return durationText + " | " + rating;
+    }
+
+    public String getReleaseDateLabel() {
+        if (releaseDate == null) {
+            return "";
+        }
+        return "Released " + releaseDate.format(RELEASE_FORMAT);
+    }
+
     @Override
     public String toString() {
         return "Movie ID: " + movieId +
