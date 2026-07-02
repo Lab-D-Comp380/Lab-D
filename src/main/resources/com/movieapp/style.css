@@ -74,3 +74,54 @@
 .ticket-button:hover {
     -fx-background-color: #ff3c62;
 }
+
+/* ===== Login / Register screens ===== */
+
+.auth-root {
+    -fx-background-color: #070707;
+}
+
+.auth-panel {
+    -fx-background-color: #141414;
+    -fx-background-radius: 14;
+    -fx-padding: 40;
+    -fx-spacing: 14;
+    -fx-max-width: 340;
+}
+
+.auth-title {
+    -fx-font-size: 26px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.auth-field-label {
+    -fx-text-fill: #d3d7da;
+}
+
+.auth-error {
+    -fx-text-fill: #ff6b6b;
+}
+
+.auth-button {
+    -fx-background-color: #e7294f;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-background-radius: 24px;
+    -fx-padding: 12 18 12 18;
+    -fx-max-width: infinity;
+}
+
+.auth-button:hover {
+    -fx-background-color: #ff3c62;
+}
+
+.auth-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #35bdf5;
+}
+
+.auth-toggle {
+    -fx-text-fill: #d3d7da;
+}

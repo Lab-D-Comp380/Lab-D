@@ -193,7 +193,7 @@ public class App extends Application {
         visible.textProperty().bindBidirectional(password.textProperty());
 
         CheckBox toggle = new CheckBox("Show password");
-        toggle.setStyle("-fx-text-fill: #9a93a8;");
+        toggle.getStyleClass().add("auth-toggle");
         toggle.setOnAction(e -> {
             boolean show = toggle.isSelected();
             visible.setManaged(show);
@@ -211,22 +211,27 @@ public class App extends Application {
     private void setScreen(VBox panel) {
         VBox root = new VBox(panel);
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #292828;");
-        stage.setScene(new Scene(root));
+        root.getStyleClass().add("auth-root");
+
+        Scene scene = new Scene(root);
+        var cssUrl = getClass().getResource("/com/movieapp/style.css");
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
+        stage.setScene(scene);
     }
 
     private VBox makePanel(Node... items) {
         VBox panel = new VBox(14, items);
         panel.setAlignment(Pos.CENTER_LEFT);
         panel.setMaxWidth(340);
-        panel.setPadding(new Insets(40));
-        panel.setStyle("-fx-background-color: #000000; -fx-background-radius: 14;");
+        panel.getStyleClass().add("auth-panel");
         return panel;
     }
 
     private Label makeTitle(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-font-size: 26px; -fx-text-fill: #27851f; -fx-font-weight: bold;");
+        l.getStyleClass().add("auth-title");
         return l;
     }
 
@@ -244,7 +249,7 @@ public class App extends Application {
 
     private Label makeError() {
         Label l = new Label();
-        l.setStyle("-fx-text-fill: #ff6b6b;");
+        l.getStyleClass().add("auth-error");
         l.setVisible(false);
         l.setManaged(false);
         l.setWrapText(true);
@@ -261,13 +266,13 @@ public class App extends Application {
     private Button makeButton(String text) {
         Button b = new Button(text);
         b.setMaxWidth(Double.MAX_VALUE);
-        b.setStyle("-fx-background-color: #27851f; -fx-text-fill: #000000; -fx-font-weight: bold;");
+        b.getStyleClass().add("auth-button");
         return b;
     }
 
     private Button makeLink(String text) {
         Button b = new Button(text);
-        b.setStyle("-fx-background-color: transparent; -fx-text-fill: #067a0c;");
+        b.getStyleClass().add("auth-link");
         return b;
     }
 
