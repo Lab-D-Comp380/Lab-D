@@ -125,3 +125,32 @@
 .auth-toggle {
     -fx-text-fill: #d3d7da;
 }
+
+/* ===== Seat selection ===== */
+
+.seat {
+    -fx-background-color: #2a2a2a;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.seat:hover {
+    -fx-background-color: #3d3d3d;
+}
+.seat-selected {
+    -fx-background-color: #e7294f;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.seat-selected:hover {
+    -fx-background-color: #ff3c62;
+}
+.seat-taken {
+    -fx-background-color: #5a1010;
+    -fx-background-radius: 6;
+    -fx-opacity: 0.5;
+}
+.screen-banner {
+    -fx-text-fill: #d3d7da;
+    -fx-font-size: 13px;
+    -fx-padding: 0 0 6 0;
+}

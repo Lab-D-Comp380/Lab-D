@@ -2,7 +2,6 @@ package com.movieapp;
 
 import javafx.application.Application;
 import javafx.concurrent.Task;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -34,9 +33,10 @@ public class App extends Application {
         stage.setMinHeight(700);
 
         databaseAvailable = DatabaseConfig.testConnection();
-        showLoginScreen();
+        databaseAvailable = DatabaseConfig.testConnection();
+        showLoginScreen();   
         stage.show();
-
+        stage.show();
         stage.setOnCloseRequest(event -> DatabaseConfig.shutdown());
     }
 
