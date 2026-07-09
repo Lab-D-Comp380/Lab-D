@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -20,6 +21,11 @@ CREATE TABLE IF NOT EXISTS bookings (
     username VARCHAR(50) NOT NULL,
     movie_id INT NOT NULL,
     ticket_count INT NOT NULL,
+    theater VARCHAR(100),
+    showtime VARCHAR(50),
+    seats VARCHAR(255),
+    payment_method VARCHAR(50),
+    card_last_four VARCHAR(4),
     booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (username) REFERENCES users(username),

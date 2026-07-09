@@ -154,3 +154,25 @@
     -fx-font-size: 13px;
     -fx-padding: 0 0 6 0;
 }
+
+/* ===== Receipt confirmation ===== */
+
+.receipt-card {
+    -fx-background-color: #141414;
+    -fx-background-radius: 14;
+    -fx-padding: 24;
+    -fx-border-color: #2a2a2a;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+.receipt-label {
+    -fx-text-fill: #9aa0a6;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.receipt-value {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}

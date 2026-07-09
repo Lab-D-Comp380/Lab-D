@@ -18,5 +18,12 @@ services:
       timeout: 5s
       retries: 10
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: movieapp-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   movieapp-mysql-data:

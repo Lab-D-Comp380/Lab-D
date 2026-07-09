@@ -1,4 +1,3 @@
-
 package com.movieapp;
 
 import javafx.geometry.Insets;
@@ -6,50 +5,81 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.function.BiConsumer;
+
 public class ShowtimeSelectionView {
 
-    public ShowtimeSelectionView() {
-        // Keeping Movie here so your gallery button can still pass the selected movie,
-        // but this screen will show blank placeholder info.
+    private final Movie movie;
+    private final BiConsumer<String, String> onShowtimeSelected;
+    private final Runnable onBack;
+
+    public ShowtimeSelectionView(Movie movie,
+                                 BiConsumer<String, String> onShowtimeSelected,
+                                 Runnable onBack) {
+        this.movie = movie;
+        this.onShowtimeSelected = onShowtimeSelected;
+        this.onBack = onBack;
     }
 
-    private Button createTimeButton(String time) {
+    private Button createTimeButton(String theater, String time) {
         Button button = new Button(time);
         button.getStyleClass().add("time-button");
-
         button.setOnAction(event -> {
-            button.setText("Selected");
+            if (onShowtimeSelected != null) {
+                onShowtimeSelected.accept(theater, time);
+            }
         });
-
         return button;
     }
 
-    private StackPane createBlankMovieImage(double width, double height) {
-        Label movieLabel = new Label("Movie");
-        movieLabel.getStyleClass().add("blank-movie-text");
-
-        StackPane box = new StackPane(movieLabel);
+    private StackPane createMovieImage(double width, double height) {
+        StackPane box = new StackPane();
         box.setPrefSize(width, height);
         box.setMinSize(width, height);
         box.setMaxSize(width, height);
         box.getStyleClass().add("blank-movie-image");
 
+        if (movie.getPosterFilename() != null) {
+            var posterStream = getClass().getResourceAsStream("/posters/" + movie.getPosterFilename());
+            if (posterStream != null) {
+                ImageView poster = new ImageView(new Image(posterStream));
+                poster.setFitWidth(width);
+                poster.setFitHeight(height);
+                poster.setPreserveRatio(true);
+                box.getChildren().add(poster);
+                return box;
+            }
+        }
+
+        Label movieLabel = new Label(movie.getTitle());
+        movieLabel.getStyleClass().add("blank-movie-text");
+        box.getChildren().add(movieLabel);
         return box;
     }
 
     public Parent createView() {
+        Button back = new Button("\u2190 Back");
+        back.getStyleClass().add("auth-link");
+        back.setOnAction(e -> {
+            if (onBack != null) {
+                onBack.run();
+            }
+        });
+
         HBox topBar = new HBox(28);
         topBar.setPadding(new Insets(18));
         topBar.setAlignment(Pos.CENTER);
 
-        Label theaterFilter = new Label("📍 Theater");
-        Label dateFilter = new Label("📅 Today");
-        Label movieFilter = new Label("🎞 Movie");
-        Label offeringFilter = new Label("☷ Premium Offerings");
+        Label theaterFilter = new Label("\ud83d\udccd Theater");
+        Label dateFilter = new Label("\ud83d\udcc5 Today");
+        Label movieFilter = new Label("\ud83c\udfac " + movie.getTitle());
+        Label offeringFilter = new Label("\u2637 Premium Offerings");
 
         theaterFilter.getStyleClass().add("filter-text");
         dateFilter.getStyleClass().add("filter-text");
@@ -59,19 +89,19 @@ public class ShowtimeSelectionView {
         topBar.getChildren().addAll(theaterFilter, dateFilter, movieFilter, offeringFilter);
         topBar.getStyleClass().add("top-bar");
 
-        Label promoBar = new Label("🏷 Members save on tickets today   Sign In or Join");
+        Label promoBar = new Label("\ud83c\udff7 Members save on tickets today   Sign In or Join");
         promoBar.getStyleClass().add("promo-bar");
         promoBar.setMaxWidth(Double.MAX_VALUE);
 
-        Label notice = new Label("🎞 Movies start 25-30 minutes after showtime.");
+        Label notice = new Label("\ud83c\udfac Movies start 25-30 minutes after showtime.");
         notice.getStyleClass().add("notice-text");
 
-        StackPane smallMovieImage = createBlankMovieImage(75, 75);
+        StackPane smallMovieImage = createMovieImage(75, 75);
 
-        Label titleLabel = new Label("Movie");
+        Label titleLabel = new Label(movie.getTitle());
         titleLabel.getStyleClass().add("showtime-title");
 
-        Label detailsLabel = new Label("2 HR 0 MIN | PG-13");
+        Label detailsLabel = new Label(movie.getDetailsLabel());
         detailsLabel.getStyleClass().add("showtime-details");
 
         VBox movieText = new VBox(6, titleLabel, detailsLabel);
@@ -79,7 +109,8 @@ public class ShowtimeSelectionView {
         HBox movieHeader = new HBox(18, smallMovieImage, movieText);
         movieHeader.setAlignment(Pos.CENTER_LEFT);
 
-        Label theaterTitle = new Label("📍 Main Theater");
+        String mainTheater = "Main Theater";
+        Label theaterTitle = new Label("\ud83d\udccd " + mainTheater);
         theaterTitle.getStyleClass().add("theater-title");
 
         Label formatLabel = new Label("DIGITAL");
@@ -90,10 +121,10 @@ public class ShowtimeSelectionView {
 
         HBox times = new HBox(
                 14,
-                createTimeButton("12:45pm"),
-                createTimeButton("3:30pm"),
-                createTimeButton("6:20pm"),
-                createTimeButton("9:15pm"));
+                createTimeButton(mainTheater, "12:45pm"),
+                createTimeButton(mainTheater, "3:30pm"),
+                createTimeButton(mainTheater, "6:20pm"),
+                createTimeButton(mainTheater, "9:15pm"));
 
         Label nearby = new Label("NEARBY THEATRES");
         nearby.getStyleClass().add("nearby-title");
@@ -102,7 +133,8 @@ public class ShowtimeSelectionView {
         line.getStyleClass().add("divider-line");
         line.setMaxWidth(Double.MAX_VALUE);
 
-        Label secondTheater = new Label("📍 Nearby Theater");
+        String nearbyTheater = "Nearby Theater";
+        Label secondTheater = new Label("\ud83d\udccd " + nearbyTheater);
         secondTheater.getStyleClass().add("theater-title");
 
         Label primeLabel = new Label("PREMIUM SHOWING");
@@ -113,8 +145,8 @@ public class ShowtimeSelectionView {
 
         HBox secondTimes = new HBox(
                 14,
-                createTimeButton("1:15pm"),
-                createTimeButton("4:45pm"));
+                createTimeButton(nearbyTheater, "1:15pm"),
+                createTimeButton(nearbyTheater, "4:45pm"));
 
         VBox leftSide = new VBox(
                 24,
@@ -130,19 +162,19 @@ public class ShowtimeSelectionView {
         leftSide.setPadding(new Insets(35, 45, 35, 45));
         leftSide.setPrefWidth(760);
 
-        StackPane bigMovieImage = createBlankMovieImage(420, 240);
+        StackPane bigMovieImage = createMovieImage(420, 240);
 
-        Label rightTitle = new Label("Movie");
+        Label rightTitle = new Label(movie.getTitle());
         rightTitle.getStyleClass().add("right-title");
 
-        Label rightDetails = new Label("2 HR 0 MIN | PG-13");
+        Label rightDetails = new Label(movie.getDetailsLabel());
         rightDetails.getStyleClass().add("showtime-details");
 
         Label rightDivider = new Label("");
         rightDivider.getStyleClass().add("right-divider");
         rightDivider.setMaxWidth(Double.MAX_VALUE);
 
-        Label movieInfo = new Label("🎞 Movie Info  >");
+        Label movieInfo = new Label("\ud83c\udfac Movie Info  >");
         movieInfo.getStyleClass().add("movie-info-text");
 
         Label criticScore = new Label("Score\nCritics");
@@ -167,7 +199,7 @@ public class ShowtimeSelectionView {
 
         HBox mainContent = new HBox(leftSide, rightSide);
 
-        VBox page = new VBox(topBar, promoBar, mainContent);
+        VBox page = new VBox(new HBox(back), topBar, promoBar, mainContent);
         page.getStyleClass().add("showtime-page");
 
         return page;

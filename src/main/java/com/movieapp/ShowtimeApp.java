@@ -4,16 +4,21 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
+
 public class ShowtimeApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        ShowtimeSelectionView view = new ShowtimeSelectionView();
+        Movie sample = new Movie(1, "Skybound", "Action", 108, "PG-13", LocalDate.of(2026, 6, 24), "skybound.png");
+        ShowtimeSelectionView view = new ShowtimeSelectionView(sample, (theater, time) -> {}, () -> {});
 
         Scene scene = new Scene(view.createView(), 1200, 800);
 
-        scene.getStylesheets().add(
-                getClass().getResource("/showtime.css").toExternalForm());
+        var cssUrl = getClass().getResource("/com/movieapp/showtime.css");
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
 
         stage.setTitle("Showtime Selection");
         stage.setScene(scene);
