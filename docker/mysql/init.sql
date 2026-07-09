@@ -15,6 +15,17 @@ CREATE TABLE IF NOT EXISTS movies (
     poster_filename VARCHAR(100)
 );
 
+CREATE TABLE IF NOT EXISTS bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    movie_id INT NOT NULL,
+    ticket_count INT NOT NULL,
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
 INSERT INTO movies (title, genre, duration_minutes, rating, release_date, poster_filename) VALUES
     ('Skybound', 'Action', 108, 'PG-13', '2026-06-24', 'skybound.png'),
     ('Pixel Quest', 'Animation', 102, 'PG', '2026-06-19', 'pixelquest.png'),
