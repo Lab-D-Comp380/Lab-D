@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: movieapp-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-movieapp}
+      MYSQL_USER: ${MYSQL_USER:-movieapp}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-movieapp}
+    volumes:
+      - movieapp-mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootsecret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: movieapp-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  movieapp-mysql-data:

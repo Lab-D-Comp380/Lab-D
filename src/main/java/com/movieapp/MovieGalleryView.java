@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+<<<<<<< Updated upstream
 public class MovieGalleryView {
 
     private VBox createMovieCard(
@@ -22,6 +23,29 @@ var posterStream = getClass().getResourceAsStream("/posters/" + posterFile);
 if (posterStream != null) {
     poster.setImage(new Image(posterStream));
 }
+=======
+import java.util.List;
+import java.util.function.Consumer;
+
+public class MovieGalleryView {
+
+    private final MovieService movieService;
+    private final Consumer<Movie> onMovieSelected;
+
+    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieSelected) {
+        this.movieService = movieService;
+        this.onMovieSelected = onMovieSelected;
+    }
+
+    private VBox createMovieCard(Movie movie) {
+        ImageView poster = new ImageView();
+        if (movie.getPosterFilename() != null) {
+            var posterStream = getClass().getResourceAsStream("/posters/" + movie.getPosterFilename());
+            if (posterStream != null) {
+                poster.setImage(new Image(posterStream));
+            }
+        }
+>>>>>>> Stashed changes
 
         poster.setFitWidth(220);
         poster.setFitHeight(330);
@@ -37,10 +61,18 @@ if (posterStream != null) {
 
         Button selectButton = new Button("Select Movie");
         selectButton.getStyleClass().add("ticket-button");
+<<<<<<< Updated upstream
 
         selectButton.setOnAction(event ->
                 selectButton.setText("Selected")
         );
+=======
+        selectButton.setOnAction(event -> {
+            if (onMovieSelected != null) {
+                onMovieSelected.accept(movie);
+            }
+        });
+>>>>>>> Stashed changes
 
         VBox card = new VBox(
                 8,

@@ -1,0 +1,129 @@
+.showtime-page {
+    -fx-background-color: black;
+}
+
+.top-bar {
+    -fx-background-color: #0b0b0d;
+    -fx-border-color: #222;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.filter-text {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+}
+
+.promo-bar {
+    -fx-background-color: #47005f;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 14px;
+    -fx-alignment: center;
+}
+
+.notice-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.showtime-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.showtime-details {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+}
+
+.theater-title {
+    -fx-text-fill: white;
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+}
+
+.format-title {
+    -fx-text-fill: white;
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+}
+
+.feature-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.time-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 22px;
+    -fx-background-radius: 22px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 24px;
+}
+
+.time-button:hover {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+.time-button-selected {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
+.nearby-title {
+    -fx-text-fill: #9bb8c7;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.divider-line {
+    -fx-background-color: #40515a;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+}
+
+.right-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.right-divider {
+    -fx-background-color: #314852;
+    -fx-min-height: 1px;
+    -fx-max-height: 1px;
+}
+
+.movie-info-text {
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+}
+
+.score-text {
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.blank-movie-image {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #555;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.blank-movie-text {
+    -fx-text-fill: #bbbbbb;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
