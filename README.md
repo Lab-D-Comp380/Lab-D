@@ -55,6 +55,8 @@ db.user=movieapp
 db.password=movieapp
 ```
 
+These defaults match the Docker Compose setup.
+
 ## Email (Mailpit)
 
 Receipt emails are sent to the email address on the user's account. Mailpit captures them locally for development:
@@ -62,13 +64,34 @@ Receipt emails are sent to the email address on the user's account. Mailpit capt
 - SMTP: `localhost:1025`
 - Web UI: [http://localhost:8025](http://localhost:8025)
 
+Mail settings are in `application.properties`:
+
+```properties
+mail.smtp.host=localhost
+mail.smtp.port=1025
+mail.from=noreply@movieapp.local
+```
+
 ## Docker commands
 
 ```bash
 docker compose up -d       # start MySQL and Mailpit in the background
 docker compose down        # stop containers (data is kept)
 docker compose down -v     # stop and wipe all data (re-runs init.sql on next up)
+docker compose logs mysql  # view MySQL logs
 ```
+
+## Project structure
+
+- `App.java` — login/register UI and full booking flow navigation
+- `MovieGalleryView.java` — movie gallery loaded from MySQL
+- `ShowtimeSelectionView.java` — showtime selection for a chosen movie
+- `SeatSelectionView.java` — seat picker
+- `PaymentView.java` — payment form (UI only, no real charges)
+- `ConfirmationView.java` — on-screen receipt after purchase
+- `EmailService.java` — sends receipt copy via Mailpit SMTP
+- `docker-compose.yml` — local MySQL and Mailpit containers
+- `docker/mysql/init.sql` — schema and seed data for users, movies, and bookings
 
 ## Troubleshooting
 

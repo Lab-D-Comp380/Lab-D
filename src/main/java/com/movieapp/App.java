@@ -15,7 +15,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.List;
 import java.util.Optional;
 
 public class App extends Application {
@@ -99,7 +98,7 @@ public class App extends Application {
         Button goRegister = makeLink("No account? Register");
         goRegister.setOnAction(e -> showRegisterScreen());
 
-        setScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
+        setAuthScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
     }
 
     private void showRegisterScreen() {
@@ -169,7 +168,7 @@ public class App extends Application {
         Button goLogin = makeLink("Already have an account? Log in");
         goLogin.setOnAction(e -> showLoginScreen());
 
-        setScreen(makePanel(title, username, email, passwordRow, error, registerButton, goLogin));
+        setAuthScreen(makePanel(title, username, email, passwordRow, error, registerButton, goLogin));
     }
 
     private void startSession(String username) {
@@ -313,7 +312,7 @@ public class App extends Application {
         return new VBox(8, stack, toggle);
     }
 
-    private void setScreen(VBox panel) {
+    private void setAuthScreen(VBox panel) {
         VBox root = new VBox(panel);
         root.setAlignment(Pos.CENTER);
         root.getStyleClass().add("auth-root");

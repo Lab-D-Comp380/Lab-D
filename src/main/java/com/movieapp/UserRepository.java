@@ -56,6 +56,20 @@ public class UserRepository {
         }
     }
 
+    public boolean existsByEmail(String email) throws SQLException {
+        String sql = "SELECT 1 FROM users WHERE email = ? LIMIT 1";
+
+        try (Connection connection = DatabaseConfig.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, email);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public void insert(String username, String email, String passwordHash) throws SQLException {
         String sql = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
 
