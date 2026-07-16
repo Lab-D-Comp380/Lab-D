@@ -10,13 +10,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MovieGalleryView {
 
     private final MovieService movieService;
+    private final Consumer<Movie> onMovieSelected;
 
-    public MovieGalleryView(MovieService movieService) {
+    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieSelected) {
         this.movieService = movieService;
+        this.onMovieSelected = onMovieSelected;
     }
 
     private VBox createMovieCard(Movie movie) {
@@ -42,7 +45,11 @@ public class MovieGalleryView {
 
         Button selectButton = new Button("Select Movie");
         selectButton.getStyleClass().add("ticket-button");
-        selectButton.setOnAction(event -> selectButton.setText("Selected"));
+        selectButton.setOnAction(event -> {
+            if (onMovieSelected != null) {
+                onMovieSelected.accept(movie);
+            }
+        });
 
         VBox card = new VBox(
                 8,

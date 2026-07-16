@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
 public final class DatabaseConfig {
@@ -32,6 +31,7 @@ public final class DatabaseConfig {
         config.setPassword(props.getProperty("db.password"));
         config.setMaximumPoolSize(Integer.parseInt(props.getProperty("db.pool.size", "5")));
         config.setConnectionTimeout(5_000);
+        config.setInitializationFailTimeout(-1);
 
         return new HikariDataSource(config);
     }
@@ -50,13 +50,31 @@ public final class DatabaseConfig {
     }
 
     public static boolean testConnection() {
-        try (Connection connection = getDataSource().getConnection()) {
-            return connection.isValid(2);
-        } catch (SQLException e) {
-            System.err.println("Database connection failed: " + e.getMessage());
-            System.err.println("Start MySQL with: docker compose up -d");
-            return false;
+        long deadline = System.currentTimeMillis() + 30_000;
+
+        while (System.currentTimeMillis() < deadline) {
+            try (Connection connection = getDataSource().getConnection()) {
+                if (connection.isValid(2)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                System.err.println("Database not ready yet: " + e.getMessage());
+                shutdown();
+            }
+
+            try {
+                Thread.sleep(1_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                shutdown();
+                return false;
+            }
         }
+
+        System.err.println("Database connection failed after 30 seconds.");
+        System.err.println("Start MySQL with: docker compose up -d");
+        shutdown();
+        return false;
     }
 
     public static void shutdown() {

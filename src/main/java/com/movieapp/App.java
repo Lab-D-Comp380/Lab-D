@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -21,6 +22,8 @@ public class App extends Application {
     private Stage stage;
     private final UserService userService = new UserService();
     private final MovieService movieService = new MovieService();
+    private final BookingService bookingService = new BookingService(new EmailService());
+    private PurchaseSession session;
     private boolean databaseAvailable;
 
     @Override
@@ -33,14 +36,11 @@ public class App extends Application {
         stage.setMinHeight(700);
 
         databaseAvailable = DatabaseConfig.testConnection();
-        databaseAvailable = DatabaseConfig.testConnection();
-        showLoginScreen();   
-        stage.show();
+        showLoginScreen();
         stage.show();
         stage.setOnCloseRequest(event -> DatabaseConfig.shutdown());
     }
 
-    // ---------- LOGIN SCREEN ----------
     private void showLoginScreen() {
         Label title = makeTitle("Sign In");
 
@@ -79,7 +79,7 @@ public class App extends Application {
                 if (loginError.isPresent()) {
                     showError(error, loginError.get());
                 } else {
-                    showMainScreen(u);
+                    startSession(u);
                 }
             });
 
@@ -98,14 +98,14 @@ public class App extends Application {
         Button goRegister = makeLink("No account? Register");
         goRegister.setOnAction(e -> showRegisterScreen());
 
-        setScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
+        setAuthScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
     }
 
-    // ---------- REGISTER SCREEN ----------
     private void showRegisterScreen() {
         Label title = makeTitle("Create Account");
 
         TextField username = makeField("Choose a username (3+ chars)");
+        TextField email = makeField("Email address");
         PasswordField password = makePasswordField("Choose a password (4+ chars)");
         Node passwordRow = withShowHide(password);
         Label error = makeError();
@@ -119,10 +119,15 @@ public class App extends Application {
 
         Runnable doRegister = () -> {
             String u = username.getText().trim();
+            String em = email.getText().trim();
             String p = password.getText();
 
             if (u.length() < 3) {
                 showError(error, "Username must be at least 3 characters.");
+                return;
+            }
+            if (!isValidEmail(em)) {
+                showError(error, "Enter a valid email address.");
                 return;
             }
             if (p.length() < 4) {
@@ -134,7 +139,7 @@ public class App extends Application {
             Task<Optional<String>> task = new Task<>() {
                 @Override
                 protected Optional<String> call() {
-                    return userService.register(u, p);
+                    return userService.register(u, em, p);
                 }
             };
 
@@ -144,7 +149,7 @@ public class App extends Application {
                 if (registerError.isPresent()) {
                     showError(error, registerError.get());
                 } else {
-                    showMainScreen(u);
+                    startSession(u);
                 }
             });
 
@@ -163,27 +168,128 @@ public class App extends Application {
         Button goLogin = makeLink("Already have an account? Log in");
         goLogin.setOnAction(e -> showLoginScreen());
 
-        setScreen(makePanel(title, username, passwordRow, error, registerButton, goLogin));
+        setAuthScreen(makePanel(title, username, email, passwordRow, error, registerButton, goLogin));
     }
 
-    // ---------- MAIN SCREEN ----------
-    private void showMainScreen(String username) {
-        MovieGalleryView gallery = new MovieGalleryView(movieService);
-        javafx.scene.Parent galleryView = gallery.createView();
+    private void startSession(String username) {
+        session = new PurchaseSession();
+        session.setUsername(username);
 
-        javafx.scene.Scene scene = new javafx.scene.Scene(galleryView);
+        Task<Optional<String>> emailTask = new Task<>() {
+            @Override
+            protected Optional<String> call() {
+                return userService.findEmailByUsername(username);
+            }
+        };
 
-        var cssUrl = getClass().getResource("/com/movieapp/style.css");
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
+        emailTask.setOnSucceeded(e -> {
+            emailTask.getValue().ifPresent(session::setEmail);
+            showGallery();
+        });
+
+        emailTask.setOnFailed(e -> showGallery());
+        new Thread(emailTask).start();
+    }
+
+    private void showGallery() {
+        MovieGalleryView gallery = new MovieGalleryView(movieService, this::showShowtimes);
+        setAppScene(gallery.createView(), false);
+    }
+
+    private void showShowtimes(Movie movie) {
+        session.setMovie(movie);
+        ShowtimeSelectionView view = new ShowtimeSelectionView(
+                movie,
+                (theater, showtime) -> {
+                    session.setTheater(theater);
+                    session.setShowtime(showtime);
+                    showSeatSelection();
+                },
+                this::showGallery
+        );
+        setAppScene(view.createView(), true);
+    }
+
+    private void showSeatSelection() {
+        SeatSelectionView view = new SeatSelectionView(
+                session.getMovie(),
+                session.getShowtime(),
+                seats -> {
+                    session.setSeats(seats);
+                    showPayment();
+                },
+                () -> showShowtimes(session.getMovie())
+        );
+        setAppScene(view.createView(), false);
+    }
+
+    private void showPayment() {
+        String seatsSummary = String.join(", ", session.getSeats());
+        PaymentView view = new PaymentView(
+                session.getMovie(),
+                session.getShowtime(),
+                seatsSummary,
+                details -> {
+                    session.setPaymentMethod(details.paymentMethod());
+                    session.setCardLastFour(details.cardLastFour());
+                    completePurchase();
+                },
+                this::showSeatSelection
+        );
+        setAppScene(view.createView(), false);
+    }
+
+    private void completePurchase() {
+        Optional<BookingReceipt> receipt = bookingService.completePurchase(session);
+        if (receipt.isPresent()) {
+            showConfirmation(receipt.get());
         } else {
-            System.out.println("WARNING: style.css not found — gallery will be unstyled.");
+            showPaymentWithError("Could not complete booking. Please try again.");
         }
+    }
 
+    private void showPaymentWithError(String message) {
+        String seatsSummary = String.join(", ", session.getSeats());
+        PaymentView view = new PaymentView(
+                session.getMovie(),
+                session.getShowtime(),
+                seatsSummary,
+                details -> {
+                    session.setPaymentMethod(details.paymentMethod());
+                    session.setCardLastFour(details.cardLastFour());
+                    completePurchase();
+                },
+                this::showSeatSelection,
+                message
+        );
+        setAppScene(view.createView(), false);
+    }
+
+    private void showConfirmation(BookingReceipt receipt) {
+        ConfirmationView view = new ConfirmationView(receipt, this::showGallery);
+        setAppScene(view.createView(), false);
+    }
+
+    private void setAppScene(Parent root, boolean includeShowtimeCss) {
+        Scene scene = new Scene(root);
+        addStylesheet(scene, "/com/movieapp/style.css");
+        if (includeShowtimeCss) {
+            addStylesheet(scene, "/com/movieapp/showtime.css");
+        }
         stage.setScene(scene);
     }
 
-    // ---------- SHOW/HIDE PASSWORD ----------
+    private void addStylesheet(Scene scene, String resourcePath) {
+        var cssUrl = getClass().getResource(resourcePath);
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.contains("@") && email.indexOf('@') < email.lastIndexOf('.');
+    }
+
     private Node withShowHide(PasswordField password) {
         TextField visible = new TextField();
         visible.setPromptText(password.getPromptText());
@@ -206,18 +312,13 @@ public class App extends Application {
         return new VBox(8, stack, toggle);
     }
 
-    // ---------- HELPERS ----------
-
-    private void setScreen(VBox panel) {
+    private void setAuthScreen(VBox panel) {
         VBox root = new VBox(panel);
         root.setAlignment(Pos.CENTER);
         root.getStyleClass().add("auth-root");
 
         Scene scene = new Scene(root);
-        var cssUrl = getClass().getResource("/com/movieapp/style.css");
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-        }
+        addStylesheet(scene, "/com/movieapp/style.css");
         stage.setScene(scene);
     }
 
