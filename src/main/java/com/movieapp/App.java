@@ -4,7 +4,9 @@ import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -14,6 +16,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.List;
 import java.util.Optional;
 
 public class App extends Application {
@@ -21,7 +24,11 @@ public class App extends Application {
     private Stage stage;
     private final UserService userService = new UserService();
     private final MovieService movieService = new MovieService();
+    private final BookingService bookingService = new BookingService();
     private boolean databaseAvailable;
+
+    // Who is logged in — needed when we save the booking.
+    private String currentUsername;
 
     @Override
     public void start(Stage stage) {
@@ -33,9 +40,7 @@ public class App extends Application {
         stage.setMinHeight(700);
 
         databaseAvailable = DatabaseConfig.testConnection();
-        databaseAvailable = DatabaseConfig.testConnection();
-        showLoginScreen();   
-        stage.show();
+        showLoginScreen();
         stage.show();
         stage.setOnCloseRequest(event -> DatabaseConfig.shutdown());
     }
@@ -79,6 +84,7 @@ public class App extends Application {
                 if (loginError.isPresent()) {
                     showError(error, loginError.get());
                 } else {
+                    currentUsername = u;
                     showMainScreen(u);
                 }
             });
@@ -144,6 +150,7 @@ public class App extends Application {
                 if (registerError.isPresent()) {
                     showError(error, registerError.get());
                 } else {
+                    currentUsername = u;
                     showMainScreen(u);
                 }
             });
@@ -166,21 +173,66 @@ public class App extends Application {
         setScreen(makePanel(title, username, passwordRow, error, registerButton, goLogin));
     }
 
-    // ---------- MAIN SCREEN ----------
+    // ---------- MAIN SCREEN (gallery) ----------
     private void showMainScreen(String username) {
-        MovieGalleryView gallery = new MovieGalleryView(movieService);
-        javafx.scene.Parent galleryView = gallery.createView();
+        MovieGalleryView gallery = new MovieGalleryView(
+                movieService,
+                movie -> showShowtimeScreen(movie)   // gallery hands the chosen movie forward
+        );
+        setContent(gallery.createView());
+    }
 
-        javafx.scene.Scene scene = new javafx.scene.Scene(galleryView);
+    // ---------- SHOWTIME SCREEN ----------
+    private void showShowtimeScreen(Movie movie) {
+        ShowtimeSelectionView view = new ShowtimeSelectionView(
+                movie,
+                showtime -> showSeatScreen(movie, showtime),  // forward movie + chosen time
+                () -> showMainScreen(currentUsername)          // back to gallery
+        );
+        setContent(view.createView());
+    }
 
-        var cssUrl = getClass().getResource("/com/movieapp/style.css");
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-        } else {
-            System.out.println("WARNING: style.css not found — gallery will be unstyled.");
-        }
+    // ---------- SEAT SCREEN ----------
+    private void showSeatScreen(Movie movie, String showtime) {
+        SeatSelectionView view = new SeatSelectionView(
+                movie,
+                showtime,
+                seats -> saveBooking(movie, showtime, seats),        // seats chosen -> save
+                () -> showShowtimeScreen(movie)                      // back to showtimes
+        );
+        setContent(view.createView());
+    }
 
-        stage.setScene(scene);
+    // ---------- SAVE BOOKING ----------
+    private void saveBooking(Movie movie, String showtime, List<String> seats) {
+        // NOTE: Booking currently stores only a ticket count, not the seat IDs or showtime.
+        // We save the count of chosen seats. (Backend: add seat + showtime columns to persist those.)
+        Booking booking = new Booking(0, currentUsername, movie.getMovieId(), seats.size());
+
+        Task<Boolean> task = new Task<>() {
+            @Override
+            protected Boolean call() {
+                return bookingService.createBooking(booking);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            boolean ok = task.getValue();
+            if (ok) {
+                showAlert(Alert.AlertType.INFORMATION, "Booking Confirmed",
+                        "Booked " + seats.size() + " seat(s) for " + movie.getTitle()
+                                + " at " + showtime + ".\nSeats: " + String.join(", ", seats));
+                showMainScreen(currentUsername);   // back to gallery after booking
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Booking Failed",
+                        "Could not save your booking. Is MySQL running?");
+            }
+        });
+
+        task.setOnFailed(e -> showAlert(Alert.AlertType.ERROR, "Booking Failed",
+                "Could not save your booking. Is MySQL running?"));
+
+        new Thread(task).start();
     }
 
     // ---------- SHOW/HIDE PASSWORD ----------
@@ -208,17 +260,38 @@ public class App extends Application {
 
     // ---------- HELPERS ----------
 
+    // Swap the main content while keeping the shared stylesheet attached.
+    private void setContent(Parent content) {
+        Scene scene = new Scene(content);
+        attachStyles(scene);
+        stage.setScene(scene);
+    }
+
     private void setScreen(VBox panel) {
         VBox root = new VBox(panel);
         root.setAlignment(Pos.CENTER);
         root.getStyleClass().add("auth-root");
 
         Scene scene = new Scene(root);
+        attachStyles(scene);
+        stage.setScene(scene);
+    }
+
+    private void attachStyles(Scene scene) {
         var cssUrl = getClass().getResource("/com/movieapp/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
+        } else {
+            System.out.println("WARNING: style.css not found — screens will be unstyled.");
         }
-        stage.setScene(scene);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private VBox makePanel(Node... items) {
