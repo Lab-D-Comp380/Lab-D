@@ -25,6 +25,7 @@ public class App extends Application {
     private final UserService userService = new UserService();
     private final MovieService movieService = new MovieService();
     private final BookingService bookingService = new BookingService();
+    private PurchaseSession session = new PurchaseSession();
     private boolean databaseAvailable;
 
     // Who is logged in — needed when we save the booking.
@@ -85,6 +86,7 @@ public class App extends Application {
                     showError(error, loginError.get());
                 } else {
                     currentUsername = u;
+                    session.setUsername(u);
                     showMainScreen(u);
                 }
             });
@@ -151,6 +153,7 @@ public class App extends Application {
                     showError(error, registerError.get());
                 } else {
                     currentUsername = u;
+                    session.setUsername(u);
                     showMainScreen(u);
                 }
             });
@@ -184,10 +187,13 @@ public class App extends Application {
 
     // ---------- SHOWTIME SCREEN ----------
     private void showShowtimeScreen(Movie movie) {
+        session.setMovie(movie);
         ShowtimeSelectionView view = new ShowtimeSelectionView(
                 movie,
-                showtime -> showSeatScreen(movie, showtime),  // forward movie + chosen time
-                () -> showMainScreen(currentUsername)          // back to gallery
+                showtime -> {session.setShowtime(showtime);
+                                showSeatScreen(movie, showtime);   // forward movie + chosen time
+                },  
+                () -> showMainScreen(currentUsername)              // back to gallery
         );
         setContent(view.createView());
     }
@@ -197,42 +203,79 @@ public class App extends Application {
         SeatSelectionView view = new SeatSelectionView(
                 movie,
                 showtime,
-                seats -> saveBooking(movie, showtime, seats),        // seats chosen -> save
-                () -> showShowtimeScreen(movie)                      // back to showtimes
+                seats -> {session.setSeats(seats);                          // seats chosen -> save
+                            showPaymentScreen();
+                },                            
+                () -> showShowtimeScreen(movie)                             // back to showtimes
         );
         setContent(view.createView());
     }
 
-    // ---------- SAVE BOOKING ----------
-    private void saveBooking(Movie movie, String showtime, List<String> seats) {
-        // NOTE: Booking currently stores only a ticket count, not the seat IDs or showtime.
-        // We save the count of chosen seats. (Backend: add seat + showtime columns to persist those.)
-        Booking booking = new Booking(0, currentUsername, movie.getMovieId(), seats.size());
+    // ---------- Payment Screen -----------
+    private void showPaymentScreen(){
+        String seatsSummary = String.join(", ", session.getSeats());
+        PaymentView view = new PaymentView(
+                session.getMovie(),
+                session.getShowtime(),
+                seatsSummary,
+                details -> {
+                    session.setPaymentMethod(details.paymentMethod());
+                    session.setCardLastFour(details.cardLastFour());
+                    completePurchase();
+                },
+                () -> showSeatScreen(session.getMovie(), session.getShowtime())
+        );
+        setAppScene(view.createView(), false);
+    }
 
-        Task<Boolean> task = new Task<>() {
-            @Override
-            protected Boolean call() {
-                return bookingService.createBooking(booking);
-            }
-        };
+    private void completePurchase() {
+        Optional<BookingReceipt> receipt = bookingService.completePurchase(session);
+        if (receipt.isPresent()) {
+            showConfirmation(receipt.get());
+        } else {
+            showPaymentWithError("Could not complete booking. Please try again.");
+        }
+    }
 
-        task.setOnSucceeded(e -> {
-            boolean ok = task.getValue();
-            if (ok) {
-                showAlert(Alert.AlertType.INFORMATION, "Booking Confirmed",
-                        "Booked " + seats.size() + " seat(s) for " + movie.getTitle()
-                                + " at " + showtime + ".\nSeats: " + String.join(", ", seats));
-                showMainScreen(currentUsername);   // back to gallery after booking
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Booking Failed",
-                        "Could not save your booking. Is MySQL running?");
-            }
-        });
+    private void showPaymentWithError(String message) {
+        String seatsSummary = String.join(", ", session.getSeats());
+        PaymentView view = new PaymentView(
+                session.getMovie(),
+                session.getShowtime(),
+                seatsSummary,
+                details -> {
+                    session.setPaymentMethod(details.paymentMethod());
+                    session.setCardLastFour(details.cardLastFour());
+                    completePurchase();
+                },
+                () -> showSeatScreen(session.getMovie(), session.getShowtime())
+        );
+        setAppScene(view.createView(), false);
+    }
 
-        task.setOnFailed(e -> showAlert(Alert.AlertType.ERROR, "Booking Failed",
-                "Could not save your booking. Is MySQL running?"));
+    private void showConfirmation(BookingReceipt receipt) {
+        ConfirmationView view = new ConfirmationView(receipt, () -> showMainScreen(currentUsername));
+        setAppScene(view.createView(), false);
+    }
 
-        new Thread(task).start();
+    private void setAppScene(Parent root, boolean includeShowtimeCss) {
+        Scene scene = new Scene(root);
+        addStylesheet(scene, "/com/movieapp/style.css");
+        if (includeShowtimeCss) {
+            addStylesheet(scene, "/com/movieapp/showtime.css");
+        }
+        stage.setScene(scene);
+    }
+
+    private void addStylesheet(Scene scene, String resourcePath) {
+        var cssUrl = getClass().getResource(resourcePath);
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.contains("@") && email.indexOf('@') < email.lastIndexOf('.');
     }
 
     // ---------- SHOW/HIDE PASSWORD ----------

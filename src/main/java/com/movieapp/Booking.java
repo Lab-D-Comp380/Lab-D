@@ -7,17 +7,32 @@ public class Booking {
     private String username;
     private int movieId;
     private int ticketCount;
+    private String theater;
+    private String showtime;
+    private String seats;
+    private String paymentMethod;
+    private String cardLastFour;
 
     // Constructor
     public Booking(int bookingId,
                    String username,
                    int movieId,
-                   int ticketCount) {
+                   int ticketCount,
+                   String theater,
+                   String showtime,
+                   String seats,
+                   String paymentMethod,
+                   String cardLastFour) {
 
         this.bookingId = bookingId;
         this.username = username;
         this.movieId = movieId;
         this.ticketCount = ticketCount;
+        this.theater = theater;
+        this.showtime = showtime;
+        this.seats = seats;
+        this.paymentMethod = paymentMethod;
+        this.cardLastFour = cardLastFour;
     }
 
     // ---------- GETTERS ----------
@@ -37,11 +52,25 @@ public class Booking {
         return ticketCount;
     }
 
-    @Override
-    public String toString() {
-        return "Booking #" + bookingId +
-               " | User: " + username +
-               " | Movie ID: " + movieId +
-               " | Tickets: " + ticketCount;
+    public String getTheater() {
+        return theater;
+    }
+
+    public String getShowtime() {
+        return showtime;
+    }
+
+    public String getSeats() {
+        return seats;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public String getCardLastFour() {
+        return cardLastFour;
     }
 }
+
+
