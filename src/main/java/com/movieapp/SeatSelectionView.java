@@ -26,6 +26,8 @@ public class SeatSelectionView {
     private final Runnable onBack;
 
     private final List<String> selectedSeats = new ArrayList<>();
+    private final List<String> initialSeats;
+    private final List<String> bookedSeats;
 
     // Grid size.
     private static final int ROWS = 6;
@@ -38,10 +40,14 @@ public class SeatSelectionView {
 
     public SeatSelectionView(Movie movie,
                              String showtime,
+                             List<String> initialSeats,
+                             List<String> bookedSeats,
                              Consumer<List<String>> onSeatsChosen,
                              Runnable onBack) {
         this.movie = movie;
         this.showtime = showtime;
+        this.initialSeats = (initialSeats != null) ? new ArrayList<>(initialSeats) : new ArrayList<>();
+        this.bookedSeats = (bookedSeats != null) ? new ArrayList<>(bookedSeats) : new ArrayList<>();
         this.onSeatsChosen = onSeatsChosen;
         this.onBack = onBack;
     }
@@ -106,11 +112,16 @@ public class SeatSelectionView {
                 Button seat = new Button();
                 seat.setPrefSize(56, 56);
 
-                if (isTaken(r, c)) {
+                if (isTaken(r, c) || bookedSeats.contains(seatId)) {
                     seat.getStyleClass().add("seat-taken");
                     seat.setDisable(true);
                 } else {
                     seat.getStyleClass().add("seat");
+                    // Re-highlight seats the user picked earlier this session.
+                    if (initialSeats.contains(seatId)) {
+                        selectedSeats.add(seatId);
+                        seat.getStyleClass().add("seat-selected");
+                    }
                     seat.setOnAction(e -> {
                         toggleSeat(seatId, seat);
                         updateSummary(summary, continueBtn);
@@ -120,10 +131,11 @@ public class SeatSelectionView {
             }
         }
 
+        updateSummary(summary, continueBtn);
         HBox footer = new HBox(16, summary, spacer(), continueBtn);
         footer.setAlignment(Pos.CENTER_LEFT);
 
-        // Spacer 
+        // Spacer
         Region pushDown = new Region();
         VBox.setVgrow(pushDown, javafx.scene.layout.Priority.ALWAYS);
 

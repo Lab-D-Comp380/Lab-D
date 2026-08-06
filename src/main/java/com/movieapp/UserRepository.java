@@ -25,6 +25,23 @@ public class UserRepository {
         }
     }
 
+    public Optional<String> findEmailByUsername(String username) throws SQLException {
+        String sql = "SELECT email FROM users WHERE username = ?";
+
+        try (Connection connection = DatabaseConfig.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, username);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.ofNullable(rs.getString("email"));
+                }
+                return Optional.empty();
+            }
+        }
+    }
+
     public boolean existsByUsername(String username) throws SQLException {
         String sql = "SELECT 1 FROM users WHERE username = ? LIMIT 1";
 
@@ -39,14 +56,15 @@ public class UserRepository {
         }
     }
 
-    public void insert(String username, String passwordHash) throws SQLException {
-        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+    public void insert(String username, String passwordHash, String email) throws SQLException {
+        String sql = "INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)";
 
         try (Connection connection = DatabaseConfig.getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, username);
             statement.setString(2, passwordHash);
+            statement.setString(3, email);
             statement.executeUpdate();
         }
     }

@@ -26,9 +26,10 @@ public class App extends Application {
     private final MovieService movieService = new MovieService();
     private final BookingService bookingService = new BookingService();
     private PurchaseSession session = new PurchaseSession();
+    private final java.util.Map<String, List<String>> bookedSeatsByShowing = new java.util.HashMap<>();
     private boolean databaseAvailable;
 
-    // Who is logged in — needed when we save the booking.
+    // Who is logged in/ need when we save the booking.
     private String currentUsername;
 
     @Override
@@ -87,6 +88,7 @@ public class App extends Application {
                 } else {
                     currentUsername = u;
                     session.setUsername(u);
+                    session.setEmail(userService.getEmail(u));
                     showMainScreen(u);
                 }
             });
@@ -106,7 +108,7 @@ public class App extends Application {
         Button goRegister = makeLink("No account? Register");
         goRegister.setOnAction(e -> showRegisterScreen());
 
-        setScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
+       setScreen(makePanel(title, username, passwordRow, error, loginButton, goRegister));
     }
 
     // ---------- REGISTER SCREEN ----------
@@ -114,6 +116,7 @@ public class App extends Application {
         Label title = makeTitle("Create Account");
 
         TextField username = makeField("Choose a username (3+ chars)");
+        TextField email = makeField("Email address");
         PasswordField password = makePasswordField("Choose a password (4+ chars)");
         Node passwordRow = withShowHide(password);
         Label error = makeError();
@@ -133,8 +136,13 @@ public class App extends Application {
                 showError(error, "Username must be at least 3 characters.");
                 return;
             }
-            if (p.length() < 4) {
+           if (p.length() < 4) {
                 showError(error, "Password must be at least 4 characters.");
+                return;
+            }
+            String em = email.getText().trim();
+            if (!isValidEmail(em)) {
+                showError(error, "Enter a valid email address.");
                 return;
             }
 
@@ -142,7 +150,7 @@ public class App extends Application {
             Task<Optional<String>> task = new Task<>() {
                 @Override
                 protected Optional<String> call() {
-                    return userService.register(u, p);
+                    return userService.register(u, p, em);
                 }
             };
 
@@ -154,6 +162,7 @@ public class App extends Application {
                 } else {
                     currentUsername = u;
                     session.setUsername(u);
+                    session.setEmail(em);
                     showMainScreen(u);
                 }
             });
@@ -173,7 +182,7 @@ public class App extends Application {
         Button goLogin = makeLink("Already have an account? Log in");
         goLogin.setOnAction(e -> showLoginScreen());
 
-        setScreen(makePanel(title, username, passwordRow, error, registerButton, goLogin));
+        setScreen(makePanel(title, username, email, passwordRow, error, registerButton, goLogin));
     }
 
     // ---------- MAIN SCREEN (gallery) ----------
@@ -200,15 +209,24 @@ public class App extends Application {
 
     // ---------- SEAT SCREEN ----------
     private void showSeatScreen(Movie movie, String showtime) {
+        String key = showingKey(movie, showtime);
+        List<String> alreadyBooked = bookedSeatsByShowing.getOrDefault(key, new java.util.ArrayList<>());
         SeatSelectionView view = new SeatSelectionView(
                 movie,
                 showtime,
-                seats -> {session.setSeats(seats);                          // seats chosen -> save
+                session.getSeats(),
+                alreadyBooked,
+                seats -> {session.setSeats(seats);
                             showPaymentScreen();
-                },                            
-                () -> showShowtimeScreen(movie)                             // back to showtimes
+                },
+                () -> showShowtimeScreen(movie)
         );
         setContent(view.createView());
+    }
+
+    // Builds a unique key for a movie + showtime combination.
+    private String showingKey(Movie movie, String showtime) {
+        return movie.getMovieId() + "|" + showtime;
     }
 
     // ---------- Payment Screen -----------
@@ -231,6 +249,12 @@ public class App extends Application {
     private void completePurchase() {
         Optional<BookingReceipt> receipt = bookingService.completePurchase(session);
         if (receipt.isPresent()) {
+            // Lock the seats we just booked for this movie + showtime (this run only).
+            String key = showingKey(session.getMovie(), session.getShowtime());
+            List<String> booked = bookedSeatsByShowing.getOrDefault(key, new java.util.ArrayList<>());
+            booked.addAll(session.getSeats());
+            bookedSeatsByShowing.put(key, booked);
+            session.setSeats(new java.util.ArrayList<>());   // clear the editable selection
             showConfirmation(receipt.get());
         } else {
             showPaymentWithError("Could not complete booking. Please try again.");
@@ -277,6 +301,7 @@ public class App extends Application {
     private boolean isValidEmail(String email) {
         return email != null && email.contains("@") && email.indexOf('@') < email.lastIndexOf('.');
     }
+    
 
     // ---------- SHOW/HIDE PASSWORD ----------
     private Node withShowHide(PasswordField password) {
