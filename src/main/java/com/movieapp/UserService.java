@@ -24,16 +24,26 @@ public class UserService {
         }
     }
 
-    public Optional<String> register(String username, String password) {
+    public Optional<String> register(String username, String password, String email) {
         try {
             if (userRepository.existsByUsername(username)) {
                 return Optional.of("That username is taken.");
             }
             String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
-            userRepository.insert(username, passwordHash);
+            userRepository.insert(username, passwordHash, email);
             return Optional.empty();
         } catch (SQLException e) {
             return Optional.of("Database error. Is MySQL running? (docker compose up -d)");
+        }
+    }
+
+    // Looks up a user's email so the purchase session can carry it to the receipt.
+    public String getEmail(String username) {
+        try {
+            return userRepository.findEmailByUsername(username).orElse(null);
+        } catch (SQLException e) {
+            System.err.println("Failed to load email for " + username + ": " + e.getMessage());
+            return null;
         }
     }
 }
