@@ -280,3 +280,6 @@
     -fx-font-size: 24px;
     -fx-font-weight: bold;
 }
+.gallery-wrapper {
+    -fx-background-color: #070707;
+}

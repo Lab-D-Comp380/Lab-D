@@ -1,0 +1,29 @@
+/* ===== My Reviews ===== */
+ 
+.star-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f4c64e;
+    -fx-font-size: 28px;
+    -fx-padding: 0 4 0 4;
+    -fx-cursor: hand;
+}
+ 
+.star-button:hover {
+    -fx-text-fill: #ffd970;
+}
+ 
+.review-stars {
+    -fx-text-fill: #f4c64e;
+    -fx-font-size: 18px;
+}
+ 
+.review-card {
+    -fx-background-color: #141414;
+    -fx-background-radius: 10;
+}
+ 
+.review-text {
+    -fx-text-fill: #d3d7da;
+    -fx-font-size: 14px;
+}
+ 
