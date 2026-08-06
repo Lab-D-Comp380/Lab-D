@@ -1,0 +1,32 @@
+*   [33m8eda178[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #11 from Lab-D-Comp380/frontend-email-seats
+[31m|[m[32m\[m  
+[31m|[m * [33m219223b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend-email-seats[m[33m, [m[1;31morigin/frontend-email-seats[m[33m)[m Add email capture at registration, seat re-highlight on revisit, and taken-seat locking after booking
+[31m|[m[31m/[m  
+* [33m5a3e076[m[33m ([m[1;32mmain[m[33m)[m Add files via upload
+* [33m98b67c3[m Add files via upload
+* [33m7a12c30[m Add files via upload
+*   [33m1a8cd27[m Merge pull request #10 from Lab-D-Comp380/frontend-flow-wiring
+[33m|[m[34m\[m  
+[33m|[m * [33mb2d80b1[m[33m ([m[1;31morigin/frontend-flow-wiring[m[33m, [m[1;32mfrontend-flow-wiring[m[33m)[m Wire gallery to showtime to seat flow, fix poster ratio, remove standalone ShowtimeApp
+[33m|[m[33m/[m  
+* [33m43bbea7[m Add bookings table with foreign key constraints
+* [33mb5df9d5[m Rename BookingService.java to src/main/java/com/movieapp/BookingService.java
+* [33m32af910[m Rename BookingRepository.java to src/main/java/com/movieapp/BookingRepository.java
+* [33m274a003[m Rename Booking.java to src/main/java/com/movieapp/Booking.java
+* [33mac4f8c1[m Add files via upload
+* [33mccb7cf5[m Add files via upload
+* [33m07b65be[m Add files via upload
+*   [33mdb9df80[m Merge pull request #7 from Lab-D-Comp380/frontend-booking
+[35m|[m[36m\[m  
+[35m|[m * [33m54d8096[m[33m ([m[1;31morigin/frontend-booking[m[33m, [m[1;32mfrontend-booking[m[33m)[m Add seat selection screen
+[35m|[m[35m/[m  
+*   [33m65a49bf[m Merge pull request #6 from Lab-D-Comp380/frontend-login-styling
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33mce565a9[m[33m ([m[1;31morigin/frontend-login-styling[m[33m, [m[1;32mfrontend-login-styling[m[33m)[m Move login/register styles to CSS, match movies screen theme
+[1;31m|[m[1;31m/[m  
+*   [33m18cddab[m Merge pull request #5 from whoisangelo1215/Database
+[1;33m|[m[1;34m\[m  
+[1;33m|[m * [33m9c65b2c[m initial code for database, using mysql
+[1;33m|[m[1;33m/[m  
+*   [33md33ca66[m Merge pull request #4 from Lab-D-Comp380/frontend-gallery-fixes
+[1;35m|[m[1;36m\[m  
