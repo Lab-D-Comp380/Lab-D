@@ -17,13 +17,16 @@ import java.util.function.Consumer;
 public class ShowtimeSelectionView {
 
     private final Movie movie;
+    private final ReviewService reviewService;
     private final Consumer<String> onShowtimeChosen;
     private final Runnable onBack;
 
     public ShowtimeSelectionView(Movie movie,
+                                 ReviewService reviewService,
                                  Consumer<String> onShowtimeChosen,
                                  Runnable onBack) {
         this.movie = movie;
+        this.reviewService = reviewService;
         this.onShowtimeChosen = onShowtimeChosen;
         this.onBack = onBack;
     }
@@ -80,7 +83,7 @@ public class ShowtimeSelectionView {
     public Parent createView() {
         // Back link
         Button back = new Button("\u2190 Back");
-        back.getStyleClass().add("auth-link");
+        back.getStyleClass().add("ticket-button");
         back.setOnAction(e -> {
             if (onBack != null) onBack.run();
         });
@@ -105,7 +108,7 @@ public class ShowtimeSelectionView {
         topBar.getChildren().addAll(theaterFilter, dateFilter, movieFilter, offeringFilter);
         topBar.getStyleClass().add("top-bar");
 
-        Label promoBar = new Label("\uD83C\uDFF7 Members save on tickets today   Sign In or Join");
+        Label promoBar = new Label("\u2B50 Rate your movies after watching in \"My Reviews\"");
         promoBar.getStyleClass().add("promo-bar");
         promoBar.setMaxWidth(Double.MAX_VALUE);
 
@@ -191,14 +194,19 @@ public class ShowtimeSelectionView {
         Label movieInfo = new Label("\uD83C\uDF9E Movie Info  >");
         movieInfo.getStyleClass().add("movie-info-text");
 
-        Label criticScore = new Label("Score\nCritics");
-        criticScore.getStyleClass().add("score-text");
-
-        Label audienceScore = new Label("Score\nAudience");
-        audienceScore.getStyleClass().add("score-text");
-
-        HBox scores = new HBox(28, movieInfo, criticScore, audienceScore);
+        HBox scores = new HBox(28, movieInfo);
         scores.setAlignment(Pos.CENTER_LEFT);
+
+        // Real audience score from user reviews. Hidden when there are no reviews.
+        if (movie != null && reviewService != null) {
+            int count = reviewService.getReviewCount(movie.getMovieId());
+            if (count > 0) {
+                double avg = reviewService.getAverageRating(movie.getMovieId());
+                Label audienceScore = new Label(String.format("\u2605 %.1f\nAudience", avg));
+                audienceScore.getStyleClass().add("score-text");
+                scores.getChildren().add(audienceScore);
+            }
+        }
 
         VBox rightSide = new VBox(
                 24,

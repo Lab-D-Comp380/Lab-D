@@ -283,3 +283,242 @@
 .gallery-wrapper {
     -fx-background-color: #070707;
 }
+/* ===== My Reviews ===== */
+
+.star-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f4c64e;
+    -fx-font-size: 30px;
+    -fx-padding: 0 4 0 4;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.star-button:hover {
+    -fx-text-fill: #ffd970;
+}
+
+.review-stars {
+    -fx-text-fill: #f4c64e;
+    -fx-font-size: 20px;
+}
+
+.review-card {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 10;
+}
+
+.review-text {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+}
+
+/* ===== Movie picker dropdown ===== */
+
+.movie-picker {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 8;
+    -fx-border-color: #3d3d3d;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 2 6 2 6;
+    -fx-cursor: hand;
+}
+
+.movie-picker .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+    -fx-font-size: 14px;
+}
+
+.movie-picker .arrow,
+.movie-picker .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.movie-picker .arrow {
+    -fx-background-color: #d3d7da;
+}
+
+.movie-picker:hover {
+    -fx-border-color: #e7294f;
+}
+
+.movie-picker-popup .list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #3d3d3d;
+}
+
+.movie-picker-popup .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: #1a1a1a;
+    -fx-font-size: 14px;
+    -fx-padding: 8 12 8 12;
+}
+
+.movie-picker-popup .list-cell:hover,
+.movie-picker-popup .list-cell:filled:selected {
+    -fx-background-color: #e7294f;
+    -fx-text-fill: white;
+}
+
+/* ===== Movie picker dropdown popup ===== */
+
+.movie-picker .combo-box-popup .list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #3d3d3d;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #3d3d3d;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: #1a1a1a;
+    -fx-font-size: 14px;
+    -fx-padding: 8 12 8 12;
+}
+
+.combo-box-popup .list-view .list-cell:hover,
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #e7294f;
+    -fx-text-fill: white;
+}
+
+/* ===== Payment form fields ===== */
+
+.text-field {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888888;
+    -fx-background-radius: 6;
+    -fx-border-color: #3d3d3d;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 8 10 8 10;
+}
+
+.text-field:focused {
+    -fx-border-color: #e7294f;
+}
+
+.combo-box {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 6;
+    -fx-border-color: #3d3d3d;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #d3d7da;
+}
+
+.combo-box:hover {
+    -fx-border-color: #e7294f;
+}
+
+/* ===== Form field labels ===== */
+
+.field-label {
+    -fx-text-fill: #d3d7da;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Order summary ===== */
+
+.summary-value {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.order-total {
+    -fx-text-fill: #e7294f;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Confirmation receipt ===== */
+
+.receipt-card {
+    -fx-background-color: #141414;
+    -fx-background-radius: 12;
+    -fx-border-color: #2a2a2a;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 24 28 24 28;
+}
+
+.receipt-label {
+    -fx-text-fill: #9aa0a6;
+    -fx-font-size: 14px;
+}
+
+.receipt-value {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Nav buttons (log out / exit) ===== */
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d3d7da;
+    -fx-border-color: #3d3d3d;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 8 18 8 18;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-border-color: #e7294f;
+    -fx-text-fill: white;
+}
+
+/* ===== Settings menu button (red, matching ticket-button) ===== */
+
+.settings-menu {
+    -fx-background-color: #e7294f;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-background-radius: 24;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+
+.settings-menu:hover {
+    -fx-background-color: #ff3a60;
+}
+
+.settings-menu .arrow {
+    -fx-background-color: white;
+}
+
+.settings-menu .context-menu {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #3d3d3d;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+}
+
+.settings-menu .menu-item .label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.settings-menu .menu-item:focused,
+.settings-menu .menu-item:hover {
+    -fx-background-color: #e7294f;
+}

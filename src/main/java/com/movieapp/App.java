@@ -9,6 +9,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -193,9 +195,20 @@ public class App extends Application {
         );
 
         Button myReviews = new Button("My Reviews");
-        myReviews.getStyleClass().add("auth-link");
+        myReviews.getStyleClass().add("ticket-button");
         myReviews.setOnAction(e -> showMyReviewsScreen());
-        HBox topBar = new HBox(myReviews);
+
+        MenuItem logOutItem = new MenuItem("Log Out");
+        logOutItem.setOnAction(e -> logOut());
+
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> exitApp());
+
+        MenuButton menu = new MenuButton("\u2630");   // hamburger icon   
+        menu.getItems().addAll(logOutItem, exitItem);
+        menu.getStyleClass().add("settings-menu");
+
+        HBox topBar = new HBox(12, myReviews, menu);
         topBar.setAlignment(Pos.CENTER_RIGHT);
         topBar.setPadding(new javafx.geometry.Insets(12, 24, 0, 24));
         topBar.getStyleClass().add("gallery-wrapper");
@@ -205,6 +218,20 @@ public class App extends Application {
         wrapper.getStyleClass().add("gallery-wrapper");
         VBox.setVgrow(galleryContent, javafx.scene.layout.Priority.ALWAYS);
         setContent(wrapper);
+    
+    }
+
+    // Logs the user out and returns to the login screen.
+    private void logOut() {
+        currentUsername = null;
+        session = new PurchaseSession();   // clear any in-progress booking
+        showLoginScreen();
+    }
+
+    // Closes the application.
+    private void exitApp() {
+        DatabaseConfig.shutdown();   
+        javafx.application.Platform.exit();
     }
 
     // ---------- MY REVIEWS SCREEN ----------
@@ -212,6 +239,7 @@ public class App extends Application {
         MyReviewsView view = new MyReviewsView(
                 currentUsername,
                 reviewService,
+                movieService,
                 () -> showMainScreen(currentUsername)
         );
         setContent(view.createView());
@@ -222,9 +250,11 @@ public class App extends Application {
         session.setMovie(movie);
         ShowtimeSelectionView view = new ShowtimeSelectionView(
                 movie,
+                reviewService,
                 showtime -> {session.setShowtime(showtime);
-                                showSeatScreen(movie, showtime);   // forward movie + chosen time
-                },  
+                                session.setTheater("Main Theater");
+                                showSeatScreen(movie, showtime);
+                },
                 () -> showMainScreen(currentUsername)              // back to gallery
         );
         setContent(view.createView());

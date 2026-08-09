@@ -55,7 +55,7 @@ public class SeatSelectionView {
     public Parent createView() {
         // Back link
         Button back = new Button("\u2190 Back");
-        back.getStyleClass().add("auth-link");
+        back.getStyleClass().add("ticket-button");
         back.setOnAction(e -> {
             if (onBack != null) onBack.run();
         });

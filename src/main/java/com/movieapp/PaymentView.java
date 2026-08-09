@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 
 public class PaymentView {
 
+    private static final double TICKET_PRICE = 12.50;
     public record PaymentDetails(String paymentMethod, String cardLastFour) {}
 
     private final Movie movie;
@@ -49,7 +50,7 @@ public class PaymentView {
 
     public Parent createView() {
         Button back = new Button("\u2190 Back");
-        back.getStyleClass().add("auth-link");
+        back.getStyleClass().add("ticket-button");
         back.setOnAction(e -> {
             if (onBack != null) onBack.run();
         });
@@ -126,23 +127,108 @@ public class PaymentView {
             }
         });
 
+        Label paymentMethodLabel = new Label("Payment method");
+        paymentMethodLabel.getStyleClass().add("field-label");
+
         VBox panel = new VBox(14,
-                new Label("Payment method"), paymentMethod,
+                paymentMethodLabel, paymentMethod,
                 cardFields,
                 error,
                 confirm);
         panel.setMaxWidth(420);
+        panel.setMinWidth(420);
+
+        // Right side: order summary
+        VBox orderSummary = buildOrderSummary();
+
+        HBox columns = new HBox(50, panel, orderSummary);
+        columns.setAlignment(Pos.TOP_CENTER);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        VBox page = new VBox(18, new HBox(back), heading, summary, panel, spacer);
+        VBox page = new VBox(18, new HBox(back), heading, summary, columns, spacer);
         page.setPadding(new Insets(24));
         page.setAlignment(Pos.TOP_CENTER);
         page.getStyleClass().add("page");
         return page;
     }
 
+        private VBox buildOrderSummary() {
+        // Poster
+        var posterBox = new javafx.scene.layout.StackPane();
+        double w = 220, h = 330;
+        posterBox.setPrefSize(w, h);
+        posterBox.setMinSize(w, h);
+        posterBox.setMaxSize(w, h);
+
+        boolean loaded = false;
+        if (movie != null && movie.getPosterFilename() != null) {
+            var posterStream = getClass().getResourceAsStream("/posters/" + movie.getPosterFilename());
+            if (posterStream != null) {
+                var poster = new javafx.scene.image.ImageView(new javafx.scene.image.Image(posterStream));
+                poster.setPreserveRatio(true);
+                poster.setFitWidth(w);
+                poster.setFitHeight(h);
+                posterBox.setClip(new javafx.scene.shape.Rectangle(w, h));
+                posterBox.getChildren().add(poster);
+                loaded = true;
+            }
+        }
+        if (!loaded) {
+            Label ph = new Label(movie != null ? movie.getTitle() : "Movie");
+            ph.getStyleClass().add("blank-movie-text");
+            posterBox.getStyleClass().add("blank-movie-image");
+            posterBox.getChildren().add(ph);
+        }
+
+        Label summaryTitle = new Label("Order Summary");
+        summaryTitle.getStyleClass().add("section-title");
+
+        int seatCount = countSeats();
+        double total = seatCount * TICKET_PRICE;
+
+        VBox lines = new VBox(8,
+                summaryRow("Movie", movie != null ? movie.getTitle() : "-"),
+                summaryRow("Showtime", showtime),
+                summaryRow("Seats", seatsSummary),
+                summaryRow("Tickets", seatCount + " \u00d7 $" + String.format("%.2f", TICKET_PRICE))
+        );
+
+        Label divider = new Label("");
+        divider.getStyleClass().add("right-divider");
+        divider.setMaxWidth(Double.MAX_VALUE);
+
+        HBox totalRow = new HBox();
+        Label totalLabel = new Label("Total");
+        totalLabel.getStyleClass().add("field-label");
+        Region push = new Region();
+        HBox.setHgrow(push, javafx.scene.layout.Priority.ALWAYS);
+        Label totalValue = new Label("$" + String.format("%.2f", total));
+        totalValue.getStyleClass().add("order-total");
+        totalRow.getChildren().addAll(totalLabel, push, totalValue);
+
+        VBox box = new VBox(16, posterBox, summaryTitle, lines, divider, totalRow);
+        box.setMaxWidth(280);
+        box.setMinWidth(280);
+        return box;
+    }
+
+    private HBox summaryRow(String label, String value) {
+        Label l = new Label(label);
+        l.getStyleClass().add("movie-details");
+        l.setMinWidth(80);
+        Label v = new Label(value != null ? value : "-");
+        v.getStyleClass().add("summary-value");
+        v.setWrapText(true);
+        HBox row = new HBox(10, l, v);
+        return row;
+    }
+
+    private int countSeats() {
+        if (seatsSummary == null || seatsSummary.isBlank()) return 0;
+        return seatsSummary.split(",").length;
+    }
     private boolean isCardBased(String method) {
         return "Credit Card".equals(method) || "Debit Card".equals(method);
     }
