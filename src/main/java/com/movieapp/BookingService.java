@@ -41,7 +41,7 @@ public class BookingService {
                     session.getMovie().getDetailsLabel(),
                     session.getTheater(),
                     session.getShowtime(),
-                    session.getSeats(),
+                    new java.util.ArrayList<>(session.getSeats()),
                     session.getPaymentMethod(),
                     session.getCardLastFour(),
                     session.getEmail()
