@@ -1,6 +1,7 @@
 package com.movieapp;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,7 +12,17 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SalesReportView {
+
+    private final SalesReportService salesReportService = new SalesReportService();
+    private Runnable onBack;
+
+    public void setOnBack(Runnable onBack) {
+        this.onBack = onBack;
+    }
 
     public void show(Stage stage) {
 
@@ -34,6 +45,11 @@ public class SalesReportView {
                 "-fx-cursor: hand;" +
                 "-fx-padding: 0;"
         );
+        backButton.setOnAction(e -> {
+            if (onBack != null) {
+                onBack.run();
+            }
+        });
 
         Label title = new Label("Sales Report");
         title.setTextFill(Color.WHITE);
@@ -75,6 +91,10 @@ public class SalesReportView {
         VBox revenueCard = createCard("Total Revenue", "$5,233.00");
         VBox ticketCard = createCard("Tickets Sold", "371");
         VBox averageCard = createCard("Average Ticket", "$14.10");
+
+        Label revenueValue = (Label) revenueCard.getChildren().get(1);
+        Label ticketsValue = (Label) ticketCard.getChildren().get(1);
+        Label averageValue = (Label) averageCard.getChildren().get(1);
 
         summaryCards.getChildren().addAll(
                 revenueCard,
@@ -158,6 +178,35 @@ public class SalesReportView {
                 "-fx-cursor: hand;"
         );
 
+        Runnable updateSummary = () -> {
+            List<MovieSale> visible = table.getItems();
+            int totalTickets = salesReportService.getTotalTickets(visible);
+            double totalRevenue = salesReportService.getTotalRevenue(visible);
+            double averageTicket = salesReportService.getAverageTicket(visible);
+            revenueValue.setText(salesReportService.formatCurrency(totalRevenue));
+            ticketsValue.setText(String.valueOf(totalTickets));
+            averageValue.setText(salesReportService.formatCurrency(averageTicket));
+        };
+
+        Runnable loadLiveSales = () -> {
+            ObservableList<MovieSale> liveSales =
+                    FXCollections.observableArrayList(salesReportService.getMovieSales());
+            allSales.setAll(liveSales);
+
+            List<String> titles = new ArrayList<>();
+            titles.add("All Movies");
+            for (MovieSale sale : allSales) {
+                titles.add(sale.getMovie());
+            }
+            movieSelector.setItems(FXCollections.observableArrayList(titles));
+            movieSelector.setValue("All Movies");
+            table.setItems(FXCollections.observableArrayList(allSales));
+            updateSummary.run();
+        };
+
+        // Replace sample rows with live totals from ticket purchases in MySQL.
+        loadLiveSales.run();
+
         movieSelector.setOnAction(event -> {
             String selectedMovie = movieSelector.getValue();
 
@@ -170,11 +219,13 @@ public class SalesReportView {
                         )
                 );
             }
+            updateSummary.run();
         });
 
         refreshButton.setOnAction(event -> {
             movieSelector.setValue("All Movies");
             table.setItems(FXCollections.observableArrayList(allSales));
+            loadLiveSales.run();
         });
 
         mainContent.getChildren().addAll(

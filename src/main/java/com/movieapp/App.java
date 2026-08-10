@@ -198,6 +198,10 @@ public class App extends Application {
         myReviews.getStyleClass().add("ticket-button");
         myReviews.setOnAction(e -> showMyReviewsScreen());
 
+        Button salesReport = new Button("Sales Report");
+        salesReport.getStyleClass().add("ticket-button");
+        salesReport.setOnAction(e -> showSalesReportScreen());
+
         MenuItem logOutItem = new MenuItem("Log Out");
         logOutItem.setOnAction(e -> logOut());
 
@@ -208,7 +212,7 @@ public class App extends Application {
         menu.getItems().addAll(logOutItem, exitItem);
         menu.getStyleClass().add("settings-menu");
 
-        HBox topBar = new HBox(12, myReviews, menu);
+        HBox topBar = new HBox(12, myReviews, salesReport, menu);
         topBar.setAlignment(Pos.CENTER_RIGHT);
         topBar.setPadding(new javafx.geometry.Insets(12, 24, 0, 24));
         topBar.getStyleClass().add("gallery-wrapper");
@@ -243,6 +247,13 @@ public class App extends Application {
                 () -> showMainScreen(currentUsername)
         );
         setContent(view.createView());
+    }
+
+    // ---------- SALES REPORT SCREEN ----------
+    private void showSalesReportScreen() {
+        SalesReportView view = new SalesReportView();
+        view.setOnBack(() -> showMainScreen(currentUsername));
+        view.show(stage);
     }
 
     // ---------- SHOWTIME SCREEN ----------
