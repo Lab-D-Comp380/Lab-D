@@ -1,11 +1,10 @@
 package com.movieapp;
 
-import java.util.List;
-import java.util.function.Consumer;
-
+import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,7 +13,15 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+
 public class MovieGalleryView {
+
+    private static final String ALL_GENRES = "All Genres";
 
     private final MovieService movieService;
     private final Consumer<Movie> onMovieChosen;
@@ -95,23 +102,31 @@ public class MovieGalleryView {
         header.getChildren().addAll(pageTitle, spacer, salesReportButton);
 
         List<Movie> movies = movieService.getMovies();
+
+        Label genreLabel = new Label("Genre");
+        genreLabel.getStyleClass().add("field-label");
+
+        ComboBox<String> genreFilter = new ComboBox<>();
+        genreFilter.getStyleClass().add("movie-picker");
+        genreFilter.setPrefWidth(200);
+        genreFilter.setItems(FXCollections.observableArrayList(buildGenreOptions(movies)));
+        genreFilter.setValue(ALL_GENRES);
+
         HBox cards = new HBox(16);
         cards.setAlignment(Pos.TOP_LEFT);
 
-        for (Movie movie : movies) {
-            cards.getChildren().add(createMovieCard(movie));
-        }
+        Runnable refreshCards = () -> populateCards(cards, movies, genreFilter.getValue());
+        genreFilter.setOnAction(e -> refreshCards.run());
+        refreshCards.run();
 
-        if (movies.isEmpty()) {
-            Label emptyLabel = new Label("No movies available.");
-            emptyLabel.getStyleClass().add("movie-details");
-            cards.getChildren().add(emptyLabel);
-        }
+        HBox filterRow = new HBox(12, genreLabel, genreFilter);
+        filterRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox page = new VBox(
                 18,
                 header,
                 sectionTitle,
+                filterRow,
                 cards
         );
 
@@ -119,5 +134,45 @@ public class MovieGalleryView {
         page.getStyleClass().add("page");
 
         return page;
+    }
+
+    private List<String> buildGenreOptions(List<Movie> movies) {
+        Set<String> genres = new LinkedHashSet<>();
+        genres.add(ALL_GENRES);
+        for (Movie movie : movies) {
+            if (movie.getGenre() != null && !movie.getGenre().isBlank()) {
+                genres.add(movie.getGenre());
+            }
+        }
+        return new ArrayList<>(genres);
+    }
+
+    private void populateCards(HBox cards, List<Movie> movies, String selectedGenre) {
+        cards.getChildren().clear();
+
+        List<Movie> visible = movies.stream()
+                .filter(movie -> matchesGenre(movie, selectedGenre))
+                .toList();
+
+        for (Movie movie : visible) {
+            cards.getChildren().add(createMovieCard(movie));
+        }
+
+        if (visible.isEmpty()) {
+            Label emptyLabel = new Label(
+                    ALL_GENRES.equals(selectedGenre) || selectedGenre == null
+                            ? "No movies available."
+                            : "No movies in this genre."
+            );
+            emptyLabel.getStyleClass().add("movie-details");
+            cards.getChildren().add(emptyLabel);
+        }
+    }
+
+    private boolean matchesGenre(Movie movie, String selectedGenre) {
+        if (selectedGenre == null || ALL_GENRES.equals(selectedGenre)) {
+            return true;
+        }
+        return selectedGenre.equalsIgnoreCase(movie.getGenre());
     }
 }
