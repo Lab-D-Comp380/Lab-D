@@ -4,13 +4,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +24,13 @@ import java.util.List;
 public class SalesReportView {
 
     private final SalesReportService salesReportService = new SalesReportService();
-    private Runnable onBack;
+    private final Runnable onBack;
 
-    public void setOnBack(Runnable onBack) {
+    public SalesReportView(Runnable onBack) {
         this.onBack = onBack;
     }
 
-    public void show(Stage stage) {
-
+    public Parent createView() {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #050505;");
 
@@ -245,11 +250,7 @@ public class SalesReportView {
 
         root.setCenter(mainContent);
 
-        Scene scene = new Scene(root, 1250, 760);
-
-        stage.setTitle("Cinema Sales Report");
-        stage.setScene(scene);
-        stage.show();
+        return root;
     }
 
     private VBox createCard(String cardTitle, String value) {

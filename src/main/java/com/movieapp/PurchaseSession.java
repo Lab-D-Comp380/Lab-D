@@ -1,6 +1,7 @@
 package com.movieapp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class PurchaseSession {
@@ -13,6 +14,7 @@ public class PurchaseSession {
     private final List<String> seats = new ArrayList<>();
     private String paymentMethod;
     private String cardLastFour;
+    private final List<SnackOrder> snackOrders = new ArrayList<>();
 
     public String getUsername() {
         return username;
@@ -79,5 +81,30 @@ public class PurchaseSession {
 
     public void setCardLastFour(String cardLastFour) {
         this.cardLastFour = cardLastFour;
+    }
+    
+    // ---------- SNACK ORDERS ----------
+        public List<SnackOrder> getSnackOrders() {
+        return snackOrders;
+    }
+
+    public void addSnackOrder(SnackOrder snackOrder) {
+        snackOrders.add(snackOrder);
+    }
+
+    public void clearSnackOrders() {
+        snackOrders.clear();
+    }
+
+    // ---------- REMOVE SNACK ORDER ----------
+    public void removeSnackOrder(int snackId) {
+        Iterator<SnackOrder> iterator = snackOrders.iterator();
+        while (iterator.hasNext()) {
+            SnackOrder order = iterator.next();
+            if (order.getSnackId() == snackId) {
+                iterator.remove();
+                return;
+            }
+        }
     }
 }
