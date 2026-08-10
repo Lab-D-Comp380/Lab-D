@@ -1,5 +1,7 @@
 package com.movieapp;
 
+import java.util.function.Consumer;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -12,8 +14,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import java.util.function.Consumer;
-
 public class PaymentView {
 
     private static final double TICKET_PRICE = 12.50;
@@ -22,6 +22,8 @@ public class PaymentView {
     private final Movie movie;
     private final String showtime;
     private final String seatsSummary;
+    private final SnackService snackService;
+    private final PurchaseSession session;
     private final Consumer<PaymentDetails> onPaymentConfirmed;
     private final Runnable onBack;
     private final String initialError;
@@ -29,20 +31,27 @@ public class PaymentView {
     public PaymentView(Movie movie,
                        String showtime,
                        String seatsSummary,
+                       SnackService snackService,
+                       PurchaseSession session,
                        Consumer<PaymentDetails> onPaymentConfirmed,
                        Runnable onBack) {
-        this(movie, showtime, seatsSummary, onPaymentConfirmed, onBack, null);
+        this(movie, showtime, seatsSummary, snackService, session, onPaymentConfirmed, onBack, null);
     }
+
 
     public PaymentView(Movie movie,
                        String showtime,
                        String seatsSummary,
+                       SnackService snackService,
+                       PurchaseSession session,
                        Consumer<PaymentDetails> onPaymentConfirmed,
                        Runnable onBack,
                        String initialError) {
         this.movie = movie;
         this.showtime = showtime;
         this.seatsSummary = seatsSummary;
+        this.snackService = snackService;
+        this.session = session;
         this.onPaymentConfirmed = onPaymentConfirmed;
         this.onBack = onBack;
         this.initialError = initialError;
@@ -154,7 +163,7 @@ public class PaymentView {
         return page;
     }
 
-        private VBox buildOrderSummary() {
+    private VBox buildOrderSummary() {
         // Poster
         var posterBox = new javafx.scene.layout.StackPane();
         double w = 220, h = 330;
@@ -188,13 +197,48 @@ public class PaymentView {
         int seatCount = countSeats();
         double total = seatCount * TICKET_PRICE;
 
-        VBox lines = new VBox(8,
-                summaryRow("Movie", movie != null ? movie.getTitle() : "-"),
-                summaryRow("Showtime", showtime),
-                summaryRow("Seats", seatsSummary),
-                summaryRow("Tickets", seatCount + " \u00d7 $" + String.format("%.2f", TICKET_PRICE))
-        );
+        // ---------- SNACK TOTAL ----------
+        double snackTotal = 0;
+        for (SnackOrder order : session.getSnackOrders()) {
+            Snack snack = snackService.findSnackById(order.getSnackId());
+            if (snack != null) {
+                snackTotal += snack.getPrice() * order.getQuantity();
+            }
+        }
 
+        // ---------- GRAND TOTAL ----------
+        double grandTotal = total + snackTotal;
+
+        VBox lines = new VBox(8);
+        lines.getChildren().add(summaryRow(
+            "Movie",
+            movie != null ? movie.getTitle() : "-"
+        ));
+        lines.getChildren().add(summaryRow(
+            "Showtime",
+            showtime
+        ));
+        lines.getChildren().add(summaryRow(
+            "Seats",
+            seatsSummary
+        ));
+        lines.getChildren().add(summaryRow(
+            "Tickets",
+            seatCount + " × $" + String.format("%.2f", TICKET_PRICE)
+        ));
+        // ---------- SNACKS ----------
+        if (!session.getSnackOrders().isEmpty()) {
+            lines.getChildren().add(summaryRow("", "----------------"));
+            lines.getChildren().add(summaryRow("Snacks", ""));
+            for (SnackOrder order : session.getSnackOrders()) {
+                Snack snack = snackService.findSnackById(order.getSnackId());
+                if (snack != null) {
+                    lines.getChildren().add(summaryRow
+                        (snack.getName(),order.getQuantity() +" × $"+String.format("%.2f", snack.getPrice()))
+                    );
+                }
+            }
+        }
         Label divider = new Label("");
         divider.getStyleClass().add("right-divider");
         divider.setMaxWidth(Double.MAX_VALUE);
@@ -204,7 +248,7 @@ public class PaymentView {
         totalLabel.getStyleClass().add("field-label");
         Region push = new Region();
         HBox.setHgrow(push, javafx.scene.layout.Priority.ALWAYS);
-        Label totalValue = new Label("$" + String.format("%.2f", total));
+        Label totalValue = new Label("$" + String.format("%.2f", grandTotal));
         totalValue.getStyleClass().add("order-total");
         totalRow.getChildren().addAll(totalLabel, push, totalValue);
 

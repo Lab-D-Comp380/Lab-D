@@ -3,17 +3,29 @@ package com.movieapp;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
 
 public class SalesReportView {
+        
+        private final Runnable onBack;
 
-    public void show(Stage stage) {
+        public SalesReportView(Runnable onBack) {
+            this.onBack = onBack;
+        }
+
+        public Parent createView(){
 
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #050505;");
@@ -27,13 +39,12 @@ public class SalesReportView {
         cinemaLabel.setFont(Font.font("Arial", FontWeight.BOLD, 15));
 
         Button backButton = new Button("← Back");
-        backButton.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #00BFFF;" +
-                "-fx-font-size: 14px;" +
-                "-fx-cursor: hand;" +
-                "-fx-padding: 0;"
-        );
+        backButton.getStyleClass().add("ticket-button");
+        backButton.setOnAction(e ->{
+                if (onBack != null) {
+                    onBack.run();
+                }
+        });
 
         Label title = new Label("Sales Report");
         title.setTextFill(Color.WHITE);
@@ -192,13 +203,9 @@ public class SalesReportView {
                 refreshButton
         );
 
-        root.setCenter(mainContent);
+        root.setCenter(mainContent); 
 
-        Scene scene = new Scene(root, 1250, 760);
-
-        stage.setTitle("Cinema Sales Report");
-        stage.setScene(scene);
-        stage.show();
+        return root;
     }
 
     private VBox createCard(String cardTitle, String value) {

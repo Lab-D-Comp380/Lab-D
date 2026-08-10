@@ -1,5 +1,8 @@
 package com.movieapp;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -7,19 +10,20 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 public class MovieGalleryView {
 
     private final MovieService movieService;
     private final Consumer<Movie> onMovieChosen;
+    private final Runnable onSalesReport;
 
-    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieChosen) {
+    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieChosen, Runnable onSalesReport) {
         this.movieService = movieService;
         this.onMovieChosen = onMovieChosen;
+        this.onSalesReport = onSalesReport;
     }
 
     private VBox createMovieCard(Movie movie) {
@@ -73,6 +77,23 @@ public class MovieGalleryView {
         Label sectionTitle = new Label("Featured Movies");
         sectionTitle.getStyleClass().add("section-title");
 
+        Button salesReportButton = new Button("Sales Report");
+        salesReportButton.getStyleClass().add("ticket-button");
+
+        salesReportButton.setOnAction(e -> {
+            if (onSalesReport != null) {
+                onSalesReport.run();
+            }
+        });
+
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        header.getChildren().addAll(pageTitle, spacer, salesReportButton);
+
         List<Movie> movies = movieService.getMovies();
         HBox cards = new HBox(16);
         cards.setAlignment(Pos.TOP_LEFT);
@@ -89,7 +110,7 @@ public class MovieGalleryView {
 
         VBox page = new VBox(
                 18,
-                pageTitle,
+                header,
                 sectionTitle,
                 cards
         );

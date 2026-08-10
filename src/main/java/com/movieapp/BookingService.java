@@ -9,6 +9,7 @@ public class BookingService {
 
     private final BookingRepository bookingRepository = new BookingRepository();
     private final EmailSender emailSender;
+    private final SnackOrderService snackOrderService = new SnackOrderService();
 
     public BookingService(){
         this(new MockEmailService());
@@ -33,6 +34,10 @@ public class BookingService {
             );
 
             int bookingId = bookingRepository.createBooking(booking);
+            for (SnackOrder snackOrder : session.getSnackOrders()) {
+                SnackOrder order = new SnackOrder(bookingId, snackOrder.getSnackId(), snackOrder.getQuantity());
+                snackOrderService.saveSnackOrder(order);
+            }    
 
             BookingReceipt receipt = new BookingReceipt(
                     bookingId,

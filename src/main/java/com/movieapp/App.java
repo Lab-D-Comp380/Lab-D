@@ -1,5 +1,8 @@
 package com.movieapp;
 
+import java.util.List;
+import java.util.Optional;
+
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
@@ -17,8 +20,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.util.List;
-import java.util.Optional;
 
 public class App extends Application {
 
@@ -26,6 +27,7 @@ public class App extends Application {
     private final UserService userService = new UserService();
     private final MovieService movieService = new MovieService();
     private final BookingService bookingService = new BookingService();
+    private final SnackService snackService = new SnackService();
     private final ReviewService reviewService = new ReviewService();
     private PurchaseSession session = new PurchaseSession();
     private final java.util.Map<String, List<String>> bookedSeatsByShowing = new java.util.HashMap<>();
@@ -191,7 +193,8 @@ public class App extends Application {
     private void showMainScreen(String username) {
         MovieGalleryView gallery = new MovieGalleryView(
                 movieService,
-                movie -> showShowtimeScreen(movie)
+                movie -> showShowtimeScreen(movie),
+                this::showSalesReport
         );
 
         Button myReviews = new Button("My Reviews");
@@ -245,6 +248,14 @@ public class App extends Application {
         setContent(view.createView());
     }
 
+    // ---------- SALES REPORT SCREEN----------
+    private void showSalesReport() {
+        SalesReportView view = new SalesReportView(
+            () -> showMainScreen(currentUsername)
+        );
+        setContent(view.createView());
+    }
+
     // ---------- SHOWTIME SCREEN ----------
     private void showShowtimeScreen(Movie movie) {
         session.setMovie(movie);
@@ -270,7 +281,7 @@ public class App extends Application {
                 session.getSeats(),
                 alreadyBooked,
                 seats -> {session.setSeats(seats);
-                            showPaymentScreen();
+                            showSnackScreen();
                 },
                 () -> showShowtimeScreen(movie)
         );
@@ -282,6 +293,16 @@ public class App extends Application {
         return movie.getMovieId() + "|" + showtime;
     }
 
+    // ---------- SNACK SCREEN ----------
+    private void showSnackScreen() {
+        SnackView view = new SnackView(snackService,session,() -> showPaymentScreen(),() -> {
+                session.clearSnackOrders();
+                showPaymentScreen();
+            }
+        );
+        setContent(view.createView());
+    }
+
     // ---------- Payment Screen -----------
     private void showPaymentScreen(){
         String seatsSummary = String.join(", ", session.getSeats());
@@ -289,6 +310,8 @@ public class App extends Application {
                 session.getMovie(),
                 session.getShowtime(),
                 seatsSummary,
+                snackService,
+                session,
                 details -> {
                     session.setPaymentMethod(details.paymentMethod());
                     session.setCardLastFour(details.cardLastFour());
@@ -320,6 +343,8 @@ public class App extends Application {
                 session.getMovie(),
                 session.getShowtime(),
                 seatsSummary,
+                snackService,
+                session,
                 details -> {
                     session.setPaymentMethod(details.paymentMethod());
                     session.setCardLastFour(details.cardLastFour());
