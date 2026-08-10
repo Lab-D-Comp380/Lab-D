@@ -1,5 +1,6 @@
 package com.movieapp;
 
+// ---------- BOOKING CLASS ----------
 public class Booking {
 
     private int bookingId;
@@ -12,6 +13,7 @@ public class Booking {
     private String paymentMethod;
     private String cardLastFour;
 
+    // Constructor
     public Booking(int bookingId,
                    String username,
                    int movieId,
@@ -21,6 +23,7 @@ public class Booking {
                    String seats,
                    String paymentMethod,
                    String cardLastFour) {
+
         this.bookingId = bookingId;
         this.username = username;
         this.movieId = movieId;
@@ -32,6 +35,7 @@ public class Booking {
         this.cardLastFour = cardLastFour;
     }
 
+    // ---------- GETTERS ----------
     public int getBookingId() {
         return bookingId;
     }
@@ -68,3 +72,5 @@ public class Booking {
         return cardLastFour;
     }
 }
+
+

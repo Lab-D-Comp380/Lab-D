@@ -10,6 +10,10 @@ public class BookingService {
     private final BookingRepository bookingRepository = new BookingRepository();
     private final EmailSender emailSender;
 
+    public BookingService(){
+        this(new MockEmailService());
+    }
+
     public BookingService(EmailSender emailSender) {
         this.emailSender = emailSender;
     }
@@ -37,7 +41,7 @@ public class BookingService {
                     session.getMovie().getDetailsLabel(),
                     session.getTheater(),
                     session.getShowtime(),
-                    session.getSeats(),
+                    new java.util.ArrayList<>(session.getSeats()),
                     session.getPaymentMethod(),
                     session.getCardLastFour(),
                     session.getEmail()

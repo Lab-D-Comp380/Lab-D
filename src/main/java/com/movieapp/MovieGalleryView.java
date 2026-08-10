@@ -15,11 +15,11 @@ import java.util.function.Consumer;
 public class MovieGalleryView {
 
     private final MovieService movieService;
-    private final Consumer<Movie> onMovieSelected;
+    private final Consumer<Movie> onMovieChosen;
 
-    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieSelected) {
+    public MovieGalleryView(MovieService movieService, Consumer<Movie> onMovieChosen) {
         this.movieService = movieService;
-        this.onMovieSelected = onMovieSelected;
+        this.onMovieChosen = onMovieChosen;
     }
 
     private VBox createMovieCard(Movie movie) {
@@ -46,8 +46,8 @@ public class MovieGalleryView {
         Button selectButton = new Button("Select Movie");
         selectButton.getStyleClass().add("ticket-button");
         selectButton.setOnAction(event -> {
-            if (onMovieSelected != null) {
-                onMovieSelected.accept(movie);
+            if (onMovieChosen != null) {
+                onMovieChosen.accept(movie);
             }
         });
 

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,6 +28,18 @@ CREATE TABLE IF NOT EXISTS bookings (
     payment_method VARCHAR(50),
     card_last_four VARCHAR(4),
     booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    movie_id INT NOT NULL,
+    rating INT NOT NULL,
+    review_text VARCHAR(1000),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (username) REFERENCES users(username),
     FOREIGN KEY (movie_id) REFERENCES movies(id)
