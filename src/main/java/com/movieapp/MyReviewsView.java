@@ -370,12 +370,9 @@ public class MyReviewsView {
         return card;
     }
 
+    private final ReviewValidator reviewValidator = new ReviewValidator();
     private String filledStars(int rating) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= 5; i++) {
-            sb.append(i <= rating ? "\u2605" : "\u2606");
-        }
-        return sb.toString();
+        return reviewValidator.filledStars(rating);
     }
 
     private Label labeled(String text) {
