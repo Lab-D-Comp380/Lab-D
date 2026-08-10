@@ -11,7 +11,16 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 public class SalesReportView {
+
+    private Runnable onBack;
+
+    public void show(Stage stage, Runnable onBack) {
+        this.onBack = onBack;
+        show(stage);
+    }
 
     public void show(Stage stage) {
 
@@ -34,6 +43,11 @@ public class SalesReportView {
                 "-fx-cursor: hand;" +
                 "-fx-padding: 0;"
         );
+        backButton.setOnAction(e -> {
+            if (onBack != null) {
+                onBack.run();
+            }
+        });
 
         Label title = new Label("Sales Report");
         title.setTextFill(Color.WHITE);
@@ -138,6 +152,16 @@ public class SalesReportView {
                 new MovieSale("The Last Orbit", 73, "$13.00", "$949.00")
         );
 
+        // Load live booking totals from the database when available.
+        SalesReportService salesReportService = new SalesReportService();
+        List<MovieSale> liveSales = salesReportService.getMovieSales();
+        if (!liveSales.isEmpty()) {
+            allSales.setAll(liveSales);
+            updateCardValue(revenueCard, salesReportService.formatCurrency(salesReportService.getTotalRevenue(liveSales)));
+            updateCardValue(ticketCard, String.valueOf(salesReportService.getTotalTickets(liveSales)));
+            updateCardValue(averageCard, salesReportService.formatCurrency(salesReportService.getAverageTicket(liveSales)));
+        }
+
         table.setItems(FXCollections.observableArrayList(allSales));
 
         table.setStyle(
@@ -163,18 +187,30 @@ public class SalesReportView {
 
             if ("All Movies".equals(selectedMovie)) {
                 table.setItems(FXCollections.observableArrayList(allSales));
+                updateCardValue(revenueCard, salesReportService.formatCurrency(salesReportService.getTotalRevenue(allSales)));
+                updateCardValue(ticketCard, String.valueOf(salesReportService.getTotalTickets(allSales)));
+                updateCardValue(averageCard, salesReportService.formatCurrency(salesReportService.getAverageTicket(allSales)));
             } else {
-                table.setItems(
-                        allSales.filtered(
-                                sale -> sale.getMovie().equals(selectedMovie)
-                        )
+                var filtered = allSales.filtered(
+                        sale -> sale.getMovie().equals(selectedMovie)
                 );
+                table.setItems(filtered);
+                updateCardValue(revenueCard, salesReportService.formatCurrency(salesReportService.getTotalRevenue(filtered)));
+                updateCardValue(ticketCard, String.valueOf(salesReportService.getTotalTickets(filtered)));
+                updateCardValue(averageCard, salesReportService.formatCurrency(salesReportService.getAverageTicket(filtered)));
             }
         });
 
         refreshButton.setOnAction(event -> {
+            List<MovieSale> refreshedSales = salesReportService.getMovieSales();
+            if (!refreshedSales.isEmpty()) {
+                allSales.setAll(refreshedSales);
+            }
             movieSelector.setValue("All Movies");
             table.setItems(FXCollections.observableArrayList(allSales));
+            updateCardValue(revenueCard, salesReportService.formatCurrency(salesReportService.getTotalRevenue(allSales)));
+            updateCardValue(ticketCard, String.valueOf(salesReportService.getTotalTickets(allSales)));
+            updateCardValue(averageCard, salesReportService.formatCurrency(salesReportService.getAverageTicket(allSales)));
         });
 
         mainContent.getChildren().addAll(
@@ -234,5 +270,11 @@ public class SalesReportView {
         );
 
         return card;
+    }
+
+    private void updateCardValue(VBox card, String value) {
+        if (card.getChildren().size() > 1 && card.getChildren().get(1) instanceof Label valueLabel) {
+            valueLabel.setText(value);
+        }
     }
 }
