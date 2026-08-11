@@ -193,8 +193,7 @@ public class App extends Application {
     private void showMainScreen(String username) {
         MovieGalleryView gallery = new MovieGalleryView(
                 movieService,
-                movie -> showShowtimeScreen(movie),
-                this::showSalesReport
+                movie -> showShowtimeScreen(movie)
         );
 
         Button myReviews = new Button("My Reviews");
