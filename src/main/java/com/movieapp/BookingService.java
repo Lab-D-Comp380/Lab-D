@@ -1,23 +1,43 @@
 package com.movieapp;
 
-import javafx.concurrent.Task;
-
 import java.sql.SQLException;
 import java.util.Optional;
 
+import javafx.concurrent.Task;
+
 public class BookingService {
 
-    private final BookingRepository bookingRepository = new BookingRepository();
+    private final BookingRepository bookingRepository;
     private final EmailSender emailSender;
-    private final SnackOrderService snackOrderService = new SnackOrderService();
+    private final SnackOrderService snackOrderService;
 
-    public BookingService(){
-        this(new MockEmailService());
+    // ---------- DEFAULT CONSTRUCTOR ----------
+    public BookingService() {
+        this(
+            new BookingRepository(),
+            new SnackOrderService(),
+            new MockEmailService()
+        );
     }
 
+    // ---------- EMAIL CONSTRUCTOR ----------
     public BookingService(EmailSender emailSender) {
-        this.emailSender = emailSender;
+        this(
+            new BookingRepository(),
+            new SnackOrderService(),
+            emailSender
+        );
     }
+
+    // ---------- TESTING CONSTRUCTOR ----------
+    public BookingService(
+        BookingRepository bookingRepository,
+        SnackOrderService snackOrderService,
+        EmailSender emailSender) {
+            this.bookingRepository = bookingRepository;
+            this.snackOrderService = snackOrderService;
+            this.emailSender = emailSender;
+        }
 
     public Optional<BookingReceipt> completePurchase(PurchaseSession session) {
         try {
@@ -61,7 +81,7 @@ public class BookingService {
         }
     }
 
-    private void sendReceiptEmail(BookingReceipt receipt) {
+    protected void sendReceiptEmail(BookingReceipt receipt) {
         Task<Void> emailTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
